@@ -15,12 +15,40 @@ The bot connects to the **WhatsApp Cloud API (Meta)**, receives customer message
 ---
 
 ## 📂 Project Structure
-.
-├── main.py # FastAPI entry point
+whatsapp-bot/
+│── app/
+│ ├── init.py
+│ ├── main.py # FastAPI entrypoint
+│ ├── config.py # App configuration & environment variables
+│ ├── db.py # Database connection setup
+│ ├── routes/ # API route definitions
+│ │ └── init.py
+│ ├── schemas/ # Pydantic schemas (request/response validation)
+│ │ └── init.py
+│ ├── services/ # Business logic and integrations
+│ │ └── init.py
+│ ├── utils/ # Utility/helper functions
+│ └── init.py
+│
+├── .env # Environment variables (Twilio SID, tokens, etc.)
 ├── requirements.txt # Python dependencies
-├── .env.example # Environment variables template
-├── README.md # Project documentation
-└── app/
-├── routes.py # API routes (WhatsApp webhook)
-├── services.py # Bot logic and OpenAI integration
-└── utils.py # Helpers and tools
+└── README.md # Project documentation
+
+
+## Tools
+- OpeanAI Account
+- Twilio Account
+- Ngrok Account
+- Railway
+
+
+## How to run local
+´´´
+app.main:app --reload --port 8000
+
+
+´´´
+### Use ngrok to expose webhook
+
+ngrok http http://localhost:8000
+
