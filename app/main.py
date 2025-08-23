@@ -4,20 +4,21 @@ from app.services import bot
 from app.routes import insert, search
 from app.utils.loader_db import load_data
 from contextlib import asynccontextmanager
+from app.config import logger
 
 
-# @asynccontextmanager
-# async def lifespan(app: FastAPI):
-#     print("🚀 API iniciada, cargando datos...")
-#     load_data()
-#     yield
-#     print("🛑 API apagada")
+
+# Create Chroma DataBase
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("🚀 API iniciada, cargando datos...")
+    load_data()
+    yield
+    logger.info("🛑 API apagada")
     
 
-# app = FastAPI(lifespan=lifespan, title='WhatsApp BOT')
-
-app = FastAPI(title='WhatsApp BOT')
-
+app = FastAPI(lifespan=lifespan, title='WhatsApp BOT')
+#app = FastAPI(title='WhatsApp CHATBOT')
 
 app.include_router(bot.router,    prefix="/docs", tags=["Bot"])
 app.include_router(insert.router, prefix="/docs", tags=["Insert"])

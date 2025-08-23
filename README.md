@@ -1,12 +1,12 @@
 # 🚗 WhatsApp Car Sales Bot
 
-This project is a **WhatsApp chatbot** built with **FastAPI** and **OpenAI models** to help automate the sales process of car-related products.  
-The bot connects to the **WhatsApp Cloud API (Meta)**, receives customer messages, and responds intelligently using **LangChain** with OpenAI.
+This project is a **WhatsApp Chatbot** built with **FastAPI** and **OpenAI models** to help automate the sales process of car-related products.  
+The bot connects to the **Twilio Sandbox**, receives customer messages, and responds intelligently using **LangChain** with OpenAI.
 
 ---
 
 ## ✨ Features
-- ✅ Integration with **WhatsApp Cloud API**  
+- ✅ Integration with **Twilio Sandbox**  
 - ✅ Powered by **OpenAI models** for natural conversations  
 - ✅ Built with **FastAPI** for scalability  
 - ✅ `.env` configuration support (via `python-dotenv`)  
@@ -35,7 +35,7 @@ whatsapp-bot/
 └── README.md # Project documentation
 
 
-## Tools
+## 🛠️ Tools
 - OpeanAI Account
 - Twilio Account
 - Ngrok Account
@@ -43,12 +43,31 @@ whatsapp-bot/
 
 
 ## How to run local
-´´´
+```
 app.main:app --reload --port 8000
+```
 
-
-´´´
 ### Use ngrok to expose webhook
-
+**Note: Use Ngrok token**
+```
 ngrok http http://localhost:8000
+```
 
+
+### Run with Dockerfile
+
+```
+sh
+docker build -t botimg .
+```
+
+```
+sh
+docker run --name botcontainer --env-file .env -p 8000:8000 botimg
+```
+
+#### Example env file
+```
+OPENAI_API_KEY=SOMETHING
+TWILIO_TOKEN=SOMETHING
+```

@@ -1,7 +1,9 @@
 from langchain_openai import OpenAI
 from langchain.chains import RetrievalQA
 from app.db import vectorstore
+from app.config import logger
 import os
+
 
 # LLM de OpenAI
 llm = OpenAI(
@@ -24,4 +26,24 @@ def insert_document(text: str):
 
 def ask_question(query: str):
     """Consulta RAG"""
-    return {"query": query, "answer": qa_chain.run(query)}
+    try:
+        logger.info(f"Asking: {query}")
+        return {"query": query, "answer": qa_chain.run(query)}
+    except:
+        logger.error(f"Error asking: {query}")
+        return {}
+    
+def ask_simil(query: str):
+    logger.info('Ask simil def')
+    
+    results = vectorstore.similarity_search(query, k=1)
+    answer = {}
+    
+    logger.info(type(results))
+    logger.info(results)
+    
+    for r in results:
+        logger.info(r.page_content)
+        answer['answer'] = r.page_content
+        
+    return answer

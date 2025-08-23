@@ -1,16 +1,30 @@
-from fastapi import APIRouter, Query
-from app.services.rag import ask_question
+from fastapi import APIRouter, HTTPException, status
+from app.services.rag import ask_question, ask_simil
 from fastapi import Request, Form
+from app.config import logger
+from app.utils.twilio import send_message
 
 router = APIRouter()
 
-@router.get("/ask")
-#def ask(query: str = Query(...)):
+@router.post(
+    "/ask",
+    summary="Fetch a trip's timeline",
+    status_code=status.HTTP_200_OK,
+)
 def ask(
-    From: str = Form(...),  # sender phone number
-    Body: str = Form(...),  # text of the message
+    From: str = Form(...),
+    Body: str = Form(...),
 ):
-    #request: Request
-    print(f"Message from {From}: {Body}")
-    return 'END'
-    #return ask_question(query)
+    
+    logger.info(f"Message from {From}: {Body}")
+    #result = ask_question(Body)
+    
+    
+    result = ask_simil(Body)
+    
+    logger.info(result)
+    logger.info(type(result))
+    
+    send_message(result['answer'])
+    
+    return True
