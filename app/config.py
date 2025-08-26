@@ -9,12 +9,13 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 TWILIO_KEY = os.getenv("TWILIO_KEY")
 CHROMA_DIR = "./chroma_db"
 CHROMA_DB = 'autos'
+CHROMA_DB_BLOG = 'blog'
+REDIS_HOST = os.getenv("REDIS_HOST")
+REDIS_PORT = os.getenv("REDIS_PORT")
 
-
-
+KAVAK_WEBSITE = 'https://www.kavak.com/mx/blog/sedes-de-kavak-en-mexico'
 
 logger = logging.getLogger("whatsapp-bot")
-
 logger.setLevel(logging.DEBUG)
 
 console_handler = logging.StreamHandler(sys.stdout)

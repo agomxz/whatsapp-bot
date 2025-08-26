@@ -7,10 +7,13 @@ from app.config import logger
 
 def load_data():
     try:
+        logger.info('Loading database for vehicles ...')
+
         df = pd.read_csv("app/utils/sample.csv")
 
         def row_to_text(row):
             return (
+                f"stock_id: {row['stock_id']}"
                 f"{row['make']} {row['model']} {row['year']} {row['version']} "
                 f"km: {row['km']}, precio: {row['price']}, "
                 f"dimensiones: {row['largo']}x{row['ancho']}x{row['altura']}, "
@@ -29,15 +32,15 @@ def load_data():
         vectorstore.add_texts(documents)
         vectorstore.persist()
 
-        logger.info("✅ Base de datos vectorial creada con autos")
+        logger.info("✅ Vehicle database ok")
         
     except:
-        logger.error("Error al crear la base de datos")
+        logger.error("Error creating vehicle database")
         
 
 
-    logger.info('Testing database ...')
+    # logger.info('Testing database ...')
 
-    results = vectorstore.similarity_search("SUV automática con menos de 100,000 km", k=1)
-    for r in results:
-        logger.info(r.page_content)
+    # results = vectorstore.similarity_search("SUV automática con menos de 100,000 km", k=1)
+    # for r in results:
+    #     logger.info(r.page_content)
