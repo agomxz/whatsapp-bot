@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     load_data()
-    #load_web_page()
+    load_web_page()
     yield
 
 

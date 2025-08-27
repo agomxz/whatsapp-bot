@@ -20,8 +20,8 @@ OMITE SALUDAR
 RECOMMENDATION_PROMPT = """
 Eres un asesor automotriz experto de KAVAK.
 UNICAMENTE DEBES DE RESPONDER PREGUNTAS RELACIONADAS CON LA AGENCIA Y SUS VEHICULOS
-Recomienda unicamente que respondes preguntas relacionas con vehiculos y la agencia
-Mantén un tono amigable y profesional. Ademas menciona que el tema a buscar no puedes realizarlo
+Recuerda unicamente que respondes preguntas relacionas con vehiculos y la agencia
+Mantén un tono amigable, profesional y se breve. Ademas menciona que el tema a buscar no puedes realizarlo
 """
 
 
@@ -30,6 +30,12 @@ Genera un plan de financiamiento resumido en 4 o 5 oraciones para un auto
 Tomando como base el precio del auto, una tasa de interés del 10% y plazos de financiamiento de entre 3 y 6 años.
 Estos son los datos del auto, busca el precio: {price}
 """
+
+FINANCING_ERROR_PROMPT = """
+Genera un mensaje para el usuario, donde se mencione que ocurrio algo inesperado y no se puede generar el financiamiento
+Mantén un tono amigable y profesional y se breve.
+"""
+
 
 SUMMARY_SHOW_VEHICLE = """
 Resume las carectisticas del siguiente vehiculo, mencionar que las dimensiones son metros, es importante mencionar el precio del vehiculo. 
