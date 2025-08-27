@@ -1,126 +1,269 @@
 from fastapi import APIRouter, status
-from app.utils.twilio import send_message
-from app.redis_memory import load_memory, save_memory, get_chat_memory, get_last_car, save_chat_memory, save_last_car, deserialize_messages, serialize_messages
+from app.utils.twilio import TwilioService
+from app.redis_memory import (
+    get_chat_memory,
+    get_last_car,
+    save_chat_memory,
+    save_last_car,
+)
 from app.services.llm_service import LLMService
+from app.dependecies.dependency import get_twilio_service
+
 from langchain.prompts import ChatPromptTemplate
-from app.config import logger
-from app.constants.propmts import WELCOME_PROMPT, RECOMMENDATION_PROMPT
+from app.constants.propmts import (
+    WELCOME_PROMPT,
+    RECOMMENDATION_PROMPT,
+    FINANCING_PROMPT,
+    VEHICLE_SUGGESTION_PROMPT,
+    SUMMARY_FRIENDLY_PROMPT,
+)
+from app.constants.coincidences import KAVAK_WEBSITE, USER_QUESTION
 from app.services.rag import show_car_by_question, show_random_vehicle
-from app.services.rag_blog import ask_to_blog, ask_company_info
-from app.db import retriever_vehicle, vectorstore,vectorstore_blog
-from langchain.chains import RetrievalQA
+from app.services.rag_blog import ask_company_info
+from app.db import vectorstore, vectorstore_blog
+from fastapi import Form, Depends
 from langchain.schema import AIMessage, HumanMessage
+from fastapi.responses import Response
+from twilio.twiml.messaging_response import MessagingResponse
+from app.config import logger
 
 
 
 router = APIRouter()
 
-@router.get(
-    "/",
-    summary="Healthcheck",
-    status_code=status.HTTP_200_OK
-)
+
+@router.get("/", summary="Healthcheck", status_code=status.HTTP_200_OK)
 def home() -> None:
-    return {"status": "WhatsApp Bot Running 🚀"}
+    return {"status": "API Running"}
 
+
+@router.post(
+            "/message", 
+            summary="Test Twilio Sandbox", 
+            status_code=status.HTTP_200_OK
+)
+def message(twilio_service: TwilioService = Depends(get_twilio_service)) -> None:
+    twilio_service.send_message('Hello from backend')
     
-@router.post("/message", status_code=status.HTTP_200_OK)
-def message() -> None:    
-    send_message('Hello from backend')    
-
 
 
 new_llm = LLMService()
 llm = new_llm.get_llm()
 
-qa_chain = RetrievalQA.from_chain_type(llm=llm, retriever=retriever_vehicle)
 
 @router.post(
     "/chat",
-    summary="Chat history",
+    summary="Local Whatsapp chatbot",
     status_code=status.HTTP_200_OK,
 )
-def chat(
-    user_id: str, 
-    user_input: str
-):
-    logger.info('Buscando historial de usuario')
-        
+def chat(user_id: str, user_input: str):
+
     chat_history = get_chat_memory(user_id)
     last_car = get_last_car(user_id)
-        
+
     if not chat_history:
-        logger.info('Este usuario es nuevo')
         initial_promt = ChatPromptTemplate.from_messages([("system", WELCOME_PROMPT)])
         welcome_chain = initial_promt | llm
         response = welcome_chain.invoke({})
 
-    else:    
-        logger.info('Este usuario ya tiene un historial')
+    else:
         if user_input == "1":
-            response = "Aquí tienes algunas opciones de autos. ¿Quieres conocer el financiamiento?\n"
-            result = show_random_vehicle(vectorstore=vectorstore, query='Muestra 1 auto al azar')                
-            response = response + result['answer']
-            save_last_car(user_id, result)
+            response = show_random_vehicle(
+                vectorstore=vectorstore, query="Muestra 1 auto al azar"
+            )
+            
+            #save_last_car(user_id, result)
 
         elif user_input == "2":
-            response = "Dime alguna característica que buscas en un auto (ejemplo: año, precio, bluetooth)."
+            prompt = ChatPromptTemplate.from_messages(
+                [("system", VEHICLE_SUGGESTION_PROMPT)]
+            )
+            chain = prompt | llm
+            response = chain.invoke(
+                {"chat_history": chat_history[-3:], "input": user_input}
+            )
 
         else:
-            if "financiamiento" in user_input.lower() and last_car:    
-                logger.info('Financiamiento??????******\n\n')            
-                precio = last_car.get("answer", "200000")
-                financing_prompt = f"Genera un plan de financiamiento resumido en 4 o 5 oraciones para un auto que cuesta ${precio}. tomando como base el precio del auto, una tasa de interés del 10% y plazos de financiamiento de entre 3 y 6 años."
-                chain = ChatPromptTemplate.from_template(financing_prompt) | llm
-                response = chain.invoke({})
+            if "financiamiento" in user_input.lower() and last_car:
+                price = last_car.get("car", False)
+                if isinstance(price, str):
+                    chain = (
+                        ChatPromptTemplate.from_template(
+                            FINANCING_PROMPT.format(price=price)
+                        )
+                        | llm
+                    )
+                    response = chain.invoke({})
+
+                else:
+                    response = "Ups ocurrio algo al momento de realizar el financiamiento, intenta de nuevo"
 
             else:
                 query = user_input.lower()
-                if any(word in query for word in ["sede", "oficina", "propuesta", "valor", "ubicación", "blog"]):
+                if any(
+                    word in query
+                    for word in KAVAK_WEBSITE
+                ):
                     result = ask_company_info(vectorstore_blog, user_input)
-                    response = result['answer']
-                
-                elif any(word in query for word in ["auto", "coche", "carro", "vehículo", "modelo", "precio", "km", "marca"]):
-                    # Usamos qa_chain para responder sobre autos
-                    result = show_car_by_question(vectorstore=vectorstore, query=user_input)
-                    logger.info(result)
-                    response = result['answer']
-                    save_last_car(user_id, {'answer':response})
-                    response = response + '\n¿Quieres saber el financiamiento, escribe financiar'
-                    
-                else:
-                    # 6️⃣ Pregunta libre general
-                    #TODO CHECKTHIS CASE
-                    prompt = ChatPromptTemplate.from_messages([("system", RECOMMENDATION_PROMPT)])
-                    chain = prompt | llm
-                    response = chain.invoke({"chat_history": chat_history[-3:], "input": user_input})
+                    response = result["answer"]
 
-            
-    
-    
-    logger.info('Guardando en memoria el contexto de la conversacion')
-        
-        
-    
-   # Convertir a string
+                    chain = (
+                        ChatPromptTemplate.from_template(
+                            SUMMARY_FRIENDLY_PROMPT.format(text=response)
+                        )
+                        | llm
+                    )
+                    response = chain.invoke({})
+
+                elif any(
+                    word in query
+                    for word in USER_QUESTION
+                ):
+
+                    result = show_car_by_question(
+                        vectorstore=vectorstore, query=user_input
+                    )
+                    response = result["answer"]
+                    save_last_car(user_id, {"answer": response})
+
+                else:
+                    prompt = ChatPromptTemplate.from_messages(
+                        [("system", RECOMMENDATION_PROMPT)]
+                    )
+                    chain = prompt | llm
+                    response = chain.invoke(
+                        {"chat_history": chat_history[-3:], "input": user_input}
+                    )
+
     user_msg = HumanMessage(content=str(user_input))
 
     if isinstance(response, dict):
-        # Si response viene como {"answer": "..."}
         ai_msg = AIMessage(content=str(response.get("answer", "")))
     else:
         ai_msg = AIMessage(content=str(response))
 
-    # Agregar al historial
     chat_history.append(user_msg)
     chat_history.append(ai_msg)
-    
-    
-    logger.info('history')
-    logger.info(chat_history)
-    
     chat_history = chat_history[-6:]
     save_chat_memory(user_id, chat_history)
     
     
+    logger.info('=========================================')
+    logger.info(type(response))
+    logger.info(response)
+    logger.info('=========================================')
+
     return {"response": response}
+
+
+@router.post(
+    "/twilio",
+    summary="Whatsapp chatbot",
+    status_code=status.HTTP_200_OK,
+)
+def chat( 
+        From: str = Form(...),
+        Body: str = Form(...),
+        twilio_service: TwilioService = Depends(get_twilio_service)
+):
+    try:
+        user_id = From
+        user_input = Body
+
+        chat_history = get_chat_memory(user_id)
+        last_car = get_last_car(user_id)
+
+        if not chat_history:
+            initial_promt = ChatPromptTemplate.from_messages([("system", WELCOME_PROMPT)])
+            welcome_chain = initial_promt | llm
+            response = welcome_chain.invoke({})
+
+        else:
+            if user_input == "1":
+                response = show_random_vehicle(
+                    vectorstore=vectorstore, query="Muestra 1 auto al azar"
+                )
+                #save_last_car(user_id, result)
+
+            elif user_input == "2":
+                prompt = ChatPromptTemplate.from_messages(
+                    [("system", VEHICLE_SUGGESTION_PROMPT)]
+                )
+                chain = prompt | llm
+                response = chain.invoke()
+
+            else:
+                if "financiamiento" in user_input.lower() and last_car:
+                    price = last_car.get("car", False)
+                    if isinstance(price, str):
+                        chain = (
+                            ChatPromptTemplate.from_template(
+                                FINANCING_PROMPT.format(price=price)
+                            )
+                            | llm
+                        )
+                        response = chain.invoke({})
+
+                    else:
+                        response = "Ups ocurrio algo al momento de realizar el financiamiento, intenta de nuevo"
+
+                else:
+                    query = user_input.lower()
+                    if any(
+                        word in query
+                        for word in KAVAK_WEBSITE
+                    ):
+                        result = ask_company_info(vectorstore_blog, user_input)
+                        response = result["answer"]
+
+                        chain = (
+                            ChatPromptTemplate.from_template(
+                                SUMMARY_FRIENDLY_PROMPT.format(text=response)
+                            )
+                            | llm
+                        )
+                        response = chain.invoke({})
+
+                    elif any(
+                        word in query
+                        for word in USER_QUESTION
+                    ):
+
+                        result = show_car_by_question(
+                            vectorstore=vectorstore, query=user_input
+                        )
+                        response = result["answer"]
+                        save_last_car(user_id, {"answer": response})
+
+                    else:
+                        prompt = ChatPromptTemplate.from_messages(
+                            [("system", RECOMMENDATION_PROMPT)]
+                        )
+                        chain = prompt | llm
+                        response = chain.invoke(
+                            {"chat_history": chat_history[-3:], "input": user_input}
+                        )
+
+        user_msg = HumanMessage(content=str(user_input))
+
+        if isinstance(response, dict):
+            ai_msg = AIMessage(content=str(response.get("answer", "")))
+        else:
+            ai_msg = AIMessage(content=str(response))
+
+        chat_history.append(user_msg)
+        chat_history.append(ai_msg)
+        chat_history = chat_history[-6:]
+        save_chat_memory(user_id, chat_history)
+        
+        twilio_service.send_message(response.content)
+        
+        #twiml = MessagingResponse()
+        #twiml.message(response)
+        #return Response(content=str(twiml), media_type="application/xml")
+        
+        return {"answer": response.content}
+
+    except Exception as e:
+        twilio_service.send_message('Agente no disponible')
+        logger.error("Unexpected error: %s", e)

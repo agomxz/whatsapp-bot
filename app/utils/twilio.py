@@ -1,21 +1,27 @@
-from app.config import TWILIO_KEY
-from twilio.rest import Client as twilio_client
+from twilio.rest import Client
+from app.config import TWILIO_KEY, TO_WHATSAPP, FROM_WHATSAPP, TWILIO_ACCOUNT_SID
 from app.config import logger
+from twilio.base.exceptions import TwilioRestException
+from twilio.twiml.messaging_response import MessagingResponse
 
 
-def send_message(body_message: str ):    
-    account_sid = 'AC89a4f161a470135a4c8267f35f85d120'
-    auth_token = TWILIO_KEY
-    client = twilio_client(account_sid, auth_token)
+class TwilioService:
+    def __init__(self):
+        self.client = Client(TWILIO_ACCOUNT_SID, TWILIO_KEY)
 
-    message = client.messages.create(
-        from_='whatsapp:+14155238886',
-        #content_sid='HXb5b62575e6e4ff6129ad7c8efe1f983e',
-        #content_variables='{"1":"hola","2":"mensaje"}',
-        to='whatsapp:+5215579123590',
-        body=body_message
-    )
+    def send_message(self, body_message: str):
+        try: 
+            message = self.client.messages.create(
+                from_=FROM_WHATSAPP,
+                to=TO_WHATSAPP,
+                body=body_message
+            )
+            logger.info(message)
+            
+            twiml = MessagingResponse()
+            
+        except TwilioRestException as e:
+            logger.error("Twilio error: %s", e)
 
-    print(message.sid)
-    
-    return True
+        except Exception as e:
+            logger.error("Unexpected error: %s", e)

@@ -7,14 +7,14 @@ embeddings = OpenAIEmbeddings()
 vectorstore = Chroma(
     collection_name=CHROMA_DB,
     embedding_function=embeddings,
-    persist_directory=CHROMA_DIR
+    persist_directory=CHROMA_DIR,
 )
 
 
 vectorstore_blog = Chroma(
     collection_name=CHROMA_DB_BLOG,
     embedding_function=embeddings,
-    persist_directory=CHROMA_DIR
+    persist_directory=CHROMA_DIR,
 )
 
 

@@ -7,7 +7,7 @@ from app.config import logger
 
 def load_data():
     try:
-        logger.info('Loading database for vehicles ...')
+        logger.info("Loading database for vehicles ...")
 
         df = pd.read_csv("app/utils/sample.csv")
 
@@ -26,18 +26,16 @@ def load_data():
         vectorstore = Chroma(
             collection_name=CHROMA_DB,
             embedding_function=embeddings,
-            persist_directory=CHROMA_DIR
+            persist_directory=CHROMA_DIR,
         )
 
         vectorstore.add_texts(documents)
         vectorstore.persist()
 
         logger.info("✅ Vehicle database ok")
-        
+
     except:
         logger.error("Error creating vehicle database")
-        
-
 
     # logger.info('Testing database ...')
 

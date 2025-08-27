@@ -8,25 +8,24 @@ import pickle
 
 r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 
-def load_memory(user_id: str):   
+
+def load_memory(user_id: str):
     """
     Busca si existe el usuario en la memoria del bot
-    """ 
-    data = r.get(user_id)    
+    """
+    data = r.get(user_id)
     if data:
-        #Si existe lo carga de redis
+        # Si existe lo carga de redis
         return pickle.loads(data)
-    
-    #Si no lo crea
-    return ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
+    # Si no lo crea
+    return ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
 
 def save_memory(user_id: str, memory):
     r.set(user_id, pickle.dumps(memory))
-        
 
-# --- Serialización para Redis ---
+
 def serialize_messages(messages):
     serialized = []
     for m in messages:
@@ -37,8 +36,6 @@ def serialize_messages(messages):
         elif isinstance(m, dict):
             serialized.append(m)
     return serialized
-
-
 
 
 def deserialize_messages(messages):
@@ -55,10 +52,6 @@ def deserialize_messages(messages):
     return deserialized
 
 
-
-
-
-
 def get_chat_memory(user_id):
     data = r.get(f"chat:{user_id}")
     if data:
@@ -68,14 +61,18 @@ def get_chat_memory(user_id):
 
 
 def save_chat_memory(user_id, messages):
-    r.set(f"chat:{user_id}", json.dumps(serialize_messages(messages)), ex=86400)
-
+    r.set(f"chat:{user_id}", json.dumps(serialize_messages(messages)))
 
 
 def get_last_car(user_id):
     data = r.get(f"last_car:{user_id}")
-    return json.loads(data) if data else None
+
+    if data:
+        logger.info(data.decode("utf-8"))
+        return {"car": data.decode("utf-8")}
+
+    return None
+
 
 def save_last_car(user_id, car_data):
-    r.set(f"last_car:{user_id}", json.dumps(car_data), ex=86400)
-
+    r.set(f"last_car:{user_id}", car_data["answer"])

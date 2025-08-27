@@ -1,0 +1,10 @@
+version: "3.9"
+
+services:
+  fastapi:
+    volumes:
+      - .:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
