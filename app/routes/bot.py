@@ -12,7 +12,6 @@ from app.services.chat_service import (
     handle_company_info,
     handle_vehicle_question,
     handle_recommendation,
-    handle_user_input,
 )
 from app.services.llm_service import LLMService
 from app.dependecies.dependency import get_twilio_service, get_llm_service
