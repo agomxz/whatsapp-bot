@@ -20,7 +20,7 @@ USER_QUESTION = [
     "precio",
     "km",
     "marca",
-    'carplay',
+    "carplay",
 ]
 
 FINNANCING_OPTIONS = [
@@ -28,5 +28,5 @@ FINNANCING_OPTIONS = [
     "financiamiento",
     "presupuesto",
     "enganche",
-    "comprar"
+    "comprar",
 ]

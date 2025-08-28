@@ -60,7 +60,6 @@ Output: 'Toyota Corolla'
 """
 
 
-
 BUDGET_PROMPT = """
 Obten el presupuesto del siguiente mensaje y regresalo respuesta
 """

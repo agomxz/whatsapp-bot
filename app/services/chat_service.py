@@ -6,7 +6,7 @@ from app.constants.propmts import (
     FINANCING_ERROR_PROMPT,
     VEHICLE_SUGGESTION_PROMPT,
     SUMMARY_FRIENDLY_PROMPT,
-    SPELLCHECK_PROMPT
+    SPELLCHECK_PROMPT,
 )
 from app.redis_memory import (
     get_last_car,
@@ -30,6 +30,7 @@ def handle_welcome(llm):
     chain = prompt | llm
     return chain.invoke({})
 
+
 def handle_random_vehicle(user_id, vectorstore):
     response = show_random_vehicle(vectorstore, query="Muestra 1 auto al azar")
     save_last_car(user_id, response.content)
@@ -42,14 +43,16 @@ def handle_vehicle_suggestion(user_input, chat_history, llm):
     return chain.invoke({"chat_history": chat_history[-3:], "input": user_input})
 
 
-def handle_financing(user_id: str, user_input:str, llm):
+def handle_financing(user_id: str, user_input: str, llm):
     try:
         last_car = get_last_car(user_id)
         price = last_car.get("car", False)
-        
+
         if isinstance(price, str):
             chain = (
-                ChatPromptTemplate.from_template(FINANCING_PROMPT.format(price=price, budget=user_input))
+                ChatPromptTemplate.from_template(
+                    FINANCING_PROMPT.format(price=price, budget=user_input)
+                )
                 | llm
             )
             return chain.invoke({})

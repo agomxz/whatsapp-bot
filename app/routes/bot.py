@@ -102,12 +102,12 @@ def chat(
 ):
     try:
         logger.info(From)
-        
+
         llm = llm_service.get_llm()
-        
+
         user_id = From
         user_input = Body.lower()
-        
+
         chat_history = get_chat_memory(user_id)
 
         if not chat_history:
@@ -121,9 +121,8 @@ def chat(
                 response = handle_vehicle_suggestion(user_input, chat_history, llm)
 
             else:
-                if user_input in FINNANCING_OPTIONS:
-                    logger.info('FINANCIAMIENTO CASO!!')
-                    logger.info(user_id)
+                
+                if any(option in user_input for option in FINNANCING_OPTIONS):
                     response = handle_financing(user_id, user_input, llm)
 
                 else:
