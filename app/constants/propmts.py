@@ -27,7 +27,7 @@ Agrega Emoji, se amigable y breve
 
 
 FINANCING_PROMPT = """
-Genera un plan de financiamiento resumido en 4 o 5 oraciones para un auto 
+Genera un plan de financiamiento resumido en 4 o 5 oraciones para un auto
 Tomando como base el precio del auto, una tasa de interés del 10% y plazos de financiamiento de entre 3 y 6 años.
 Estos son los datos del auto, busca el precio: {price} considerando el siguiente enganche del usuario: {budget}
 Agrega Emoji, se amigable y breve ademas muestra el texto en una forma facil de entender
@@ -40,7 +40,7 @@ Mantén un tono amigable y profesional y se breve.
 
 
 SUMMARY_SHOW_VEHICLE = """
-Resume las carectisticas del siguiente vehiculo, mencionar que las dimensiones son metros, es importante mencionar el precio del vehiculo. 
+Resume las carectisticas del siguiente vehiculo, mencionar que las dimensiones son metros, es importante mencionar el precio del vehiculo.
 Sugiere si desea hacer financiamiento escriba financiar
 Y muestra un ejemplo de texto que el deba de escribir como 'Financiamiento con 50 mil pesos de enganche'
 Agrega Emoji, se amigable y breve

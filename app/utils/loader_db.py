@@ -34,11 +34,6 @@ def load_data():
 
         logger.info("✅ Vehicle database ok")
 
-    except:
+    except Exception as e:
+        logger.error("Unexpected error: %s", e)
         logger.error("Error creating vehicle database")
-
-    # logger.info('Testing database ...')
-
-    # results = vectorstore.similarity_search("SUV automática con menos de 100,000 km", k=1)
-    # for r in results:
-    #     logger.info(r.page_content)

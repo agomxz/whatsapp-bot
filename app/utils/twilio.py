@@ -2,7 +2,6 @@ from twilio.rest import Client
 from app.config import TWILIO_KEY, TO_WHATSAPP, FROM_WHATSAPP, TWILIO_ACCOUNT_SID
 from app.config import logger
 from twilio.base.exceptions import TwilioRestException
-from twilio.twiml.messaging_response import MessagingResponse
 
 
 class TwilioService:
@@ -15,8 +14,6 @@ class TwilioService:
                 from_=FROM_WHATSAPP, to=TO_WHATSAPP, body=body_message
             )
             logger.info(message)
-
-            twiml = MessagingResponse()
 
         except TwilioRestException as e:
             logger.error("Twilio error: %s", e)

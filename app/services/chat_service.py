@@ -78,7 +78,8 @@ def handle_financing(user_id: str, user_input: str, llm):
         else:
             chain = ChatPromptTemplate.from_template(FINANCING_ERROR_PROMPT) | llm
             return chain.invoke({})
-    except:
+    except Exception as e:
+        logger.error("Unexpected error: %s", e)
         logger.error("Error getting financing")
         chain = ChatPromptTemplate.from_template(FINANCING_ERROR_PROMPT) | llm
         return chain.invoke({})

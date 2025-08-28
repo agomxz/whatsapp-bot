@@ -31,5 +31,6 @@ def load_web_page():
 
         logger.info("✅ Blog database ok")
 
-    except:
+    except Exception as e:
+        logger.error(e)
         logger.error("Error creating blog database")

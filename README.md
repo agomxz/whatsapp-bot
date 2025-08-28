@@ -29,27 +29,18 @@ graph TD
     A --> F[services]
     A --> G[utils]
     
-    B --> B1[__pycache__]
-    B1 --> B1a[__init__.py]
     B --> B2[coincidences.py]
     B --> B3[errors.py]
     B --> B4[messages.py]
     B --> B5[prompts.py]
     
-    C --> C1[__pycache__]
-    C1 --> C1a[__init__.py]
     C --> C2[dependency.py]
     
-    D --> D1[__pycache__]
-    D1 --> D1a[__init__.py]
     D --> D2[bot.py]
     
-    E --> E1[__pycache__]
-    E1 --> E1a[chat_request.py]
-    E1 --> E1b[prompt.py]
+    E --> E1a[chat_request.py]
+    E --> E1b[prompt.py]
     
-    F --> F1[__pycache__]
-    F1 --> F1a[__init__.py]
     F --> F2[chat_service.py]
     F --> F3[conversation_history.py]
     F --> F4[llm_service.py]
@@ -132,15 +123,15 @@ docker compose up
 
 
 
-
 #### Example env file
 ```
-OPENAI_API_KEY=xxxxxxxxxxx
-TWILIO_TOKEN=xxxxxxxxxxxxx
-REDIS_URL=xxxxxxxxxxxxxx
-TO_WHATSAPP=XXXXXXXX
-FROM_WHATSAPP=XXXXXXXX
-CHROMA_DIR =XXXXXXXX
-CHROMA_DB=XXXXXXXX
-CHROMA_DB_BLOG=XXXXXXXX
+OPENAI_API_KEY=xxxx
+TWILIO_KEY=xxxx
+TWILIO_ACCOUNT_SID=xxxx
+REDIS_URL=xxxx
+TO_WHATSAPP=xxxx
+FROM_WHATSAPP=xxxx
+CHROMA_DIR=./chroma_db
+CHROMA_DB=autos
+CHROMA_DB_BLOG=blog
 ```

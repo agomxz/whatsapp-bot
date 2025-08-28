@@ -93,7 +93,7 @@ def chat(request: ChatRequest, llm_service: LLMService = Depends(get_llm_service
     summary="Whatsapp chatbot",
     status_code=status.HTTP_200_OK,
 )
-def chat(
+def twilio_chat(
     From: str = Form(...),
     Body: str = Form(...),
     twilio_service: TwilioService = Depends(get_twilio_service),
