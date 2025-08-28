@@ -14,23 +14,44 @@ The bot connects to the **Twilio Sandbox**, receives customer messages, and resp
 ---
 
 ## 📂 Project Structure
-whatsapp-bot/
-├── app/
-│   ├── __init__.py
-│   ├── main.py          # FastAPI entrypoint
-│   ├── config.py        # App configuration & environment variables
-│   ├── db.py            # Database connection setup
-│   ├── routes/          # API route definitions
-│   │   ├── __init__.py
-│   ├── schemas/         # Pydantic schemas (request/response validation)
-│   │   ├── __init__.py
-│   ├── services/        # Business logic and integrations
-│   │   ├── __init__.py
-│   └── utils/           # Utility/helper functions
-│       ├── __init__.py
-├── .env                 # Environment variables (Twilio SID, tokens, etc.)
-├── requirements.txt     # Python dependencies
-└── README.md            # Project documentation
+
+flowchart TD
+    whatsapp_bot[whatsapp-bot/]
+    app[app/]
+    init_app[__init__.py]
+    main[main.py<br>FastAPI entrypoint]
+    config[config.py<br>App configuration & environment variables]
+    db[db.py<br>Database connection setup]
+    routes[routes/]
+    routes_init[__init__.py]
+    schemas[schemas/]
+    schemas_init[__init__.py]
+    services[services/]
+    services_init[__init__.py]
+    utils[utils/]
+    utils_init[__init__.py]
+    env[.env<br>Environment variables (Twilio SID, tokens, etc.)]
+    requirements[requirements.txt<br>Python dependencies]
+    readme[README.md<br>Project documentation]
+
+    whatsapp_bot --> app
+    app --> init_app
+    app --> main
+    app --> config
+    app --> db
+    app --> routes
+    routes --> routes_init
+    app --> schemas
+    schemas --> schemas_init
+    app --> services
+    services --> services_init
+    app --> utils
+    utils --> utils_init
+    whatsapp_bot --> env
+    whatsapp_bot --> requirements
+    whatsapp_bot --> readme
+
+
 
 
 

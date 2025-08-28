@@ -6,7 +6,6 @@ from app.config import REDIS_URL
 from app.config import logger
 import pickle
 
-# r = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
 r = redis.from_url(REDIS_URL)
 
 

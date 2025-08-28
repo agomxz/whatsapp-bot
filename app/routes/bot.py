@@ -121,7 +121,7 @@ def chat(
                 response = handle_vehicle_suggestion(user_input, chat_history, llm)
 
             else:
-                
+
                 if any(option in user_input for option in FINNANCING_OPTIONS):
                     response = handle_financing(user_id, user_input, llm)
 
