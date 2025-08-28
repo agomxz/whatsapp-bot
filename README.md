@@ -116,8 +116,8 @@ http://127.0.0.1:8000/docs
 ```
 
 ### Config Twilio
-![Alt text](docs/twilio.jepg)
-
+Access to Twilio account and add the ngrok endpoint to connet with Whatsapp.
+![alt text](docs/twilio.png)
 
 ----
 ### How to run it with Docker-compose
