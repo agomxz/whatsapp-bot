@@ -25,9 +25,9 @@ flowchart TD
     whatsapp_bot[whatsapp-bot/]
     app[app/]
     init_app[__init__.py]
-    main[main.py<br>FastAPI entrypoint]
-    config[config.py<br>App configuration & environment variables]
-    db[db.py<br>Database connection setup]
+    main[main.py FastAPI entrypoint]
+    config[config.py App configuration & environment variables]
+    db[db.py Database connection setup]
     routes[routes/]
     routes_init[__init__.py]
     schemas[schemas/]
@@ -36,9 +36,9 @@ flowchart TD
     services_init[__init__.py]
     utils[utils/]
     utils_init[__init__.py]
-    env[.env<br>Environment variables (Twilio SID, tokens, etc.)]
-    requirements[requirements.txt<br>Python dependencies]
-    readme[README.md<br>Project documentation]
+    env[.env Environment variables (Twilio SID, tokens, etc.)]
+    requirements[requirements.txt Python dependencies]
+    readme[README.md Project documentation]
 
     whatsapp_bot --> app
     app --> init_app
