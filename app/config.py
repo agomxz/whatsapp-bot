@@ -7,6 +7,7 @@ load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 TWILIO_KEY = os.getenv("TWILIO_KEY")
+TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
 CHROMA_DIR = os.getenv("CHROMA_DIR")
 CHROMA_DB = os.getenv("CHROMA_DB")
 CHROMA_DB_BLOG = os.getenv("CHROMA_DB_BLOG")
