@@ -10,8 +10,7 @@ TWILIO_KEY = os.getenv("TWILIO_KEY")
 CHROMA_DIR = "./chroma_db"
 CHROMA_DB = "autos"
 CHROMA_DB_BLOG = "blog"
-REDIS_HOST = os.getenv("REDIS_HOST")
-REDIS_PORT = os.getenv("REDIS_PORT")
+REDIS_URL = os.getenv("REDIS_URL")
 
 TO_WHATSAPP = "whatsapp:+5215579123590"
 FROM_WHATSAPP = "whatsapp:+14155238886"

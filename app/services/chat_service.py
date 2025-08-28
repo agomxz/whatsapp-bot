@@ -6,6 +6,7 @@ from app.constants.propmts import (
     FINANCING_ERROR_PROMPT,
     VEHICLE_SUGGESTION_PROMPT,
     SUMMARY_FRIENDLY_PROMPT,
+    SPELLCHECK_PROMPT
 )
 from app.redis_memory import (
     get_last_car,
@@ -16,11 +17,18 @@ from app.services.rag_blog import ask_company_info
 from app.config import logger
 
 
+def handle_user_input(llm, user_text: str):
+    spellcheck_chain = ChatPromptTemplate.from_template(SPELLCHECK_PROMPT)
+    corrected_input = spellcheck_chain | llm
+    user_input = corrected_input.invoke({})
+    logger.info(user_input.content)
+    return user_input.content.lower()
+
+
 def handle_welcome(llm):
     prompt = ChatPromptTemplate.from_messages([("system", WELCOME_PROMPT)])
     chain = prompt | llm
     return chain.invoke({})
-
 
 def handle_random_vehicle(user_id, vectorstore):
     response = show_random_vehicle(vectorstore, query="Muestra 1 auto al azar")
@@ -34,14 +42,14 @@ def handle_vehicle_suggestion(user_input, chat_history, llm):
     return chain.invoke({"chat_history": chat_history[-3:], "input": user_input})
 
 
-def handle_financing(user_id: str, llm):
+def handle_financing(user_id: str, user_input:str, llm):
     try:
         last_car = get_last_car(user_id)
         price = last_car.get("car", False)
-
+        
         if isinstance(price, str):
             chain = (
-                ChatPromptTemplate.from_template(FINANCING_PROMPT.format(price=price))
+                ChatPromptTemplate.from_template(FINANCING_PROMPT.format(price=price, budget=user_input))
                 | llm
             )
             return chain.invoke({})

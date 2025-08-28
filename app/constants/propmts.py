@@ -13,7 +13,7 @@ UNICAMENTE DEBES DE RESPONDER PREGUNTAS RELACIONADAS CON LA AGENCIA Y SUS VEHICU
 VEHICLE_SUGGESTION_PROMPT = """
 Sugiere al cliente que puede buscar un auto utilizando alguna caracteristica como el año, precio, marca, modelo, carplay o bluetooth.
 Y devolveras alguna coincidencia de nuestra base de datos, ademas sugiere que si quiere conocer el financiamento acepte la opción.
-OMITE SALUDAR
+OMITE SALUDAR. Agrega Emoji, se amigable y breve
 """
 
 
@@ -22,13 +22,15 @@ Eres un asesor automotriz experto de KAVAK.
 UNICAMENTE DEBES DE RESPONDER PREGUNTAS RELACIONADAS CON LA AGENCIA Y SUS VEHICULOS
 Recuerda unicamente que respondes preguntas relacionas con vehiculos y la agencia
 Mantén un tono amigable, profesional y se breve. Ademas menciona que el tema a buscar no puedes realizarlo
+Agrega Emoji, se amigable y breve
 """
 
 
 FINANCING_PROMPT = """
 Genera un plan de financiamiento resumido en 4 o 5 oraciones para un auto 
 Tomando como base el precio del auto, una tasa de interés del 10% y plazos de financiamiento de entre 3 y 6 años.
-Estos son los datos del auto, busca el precio: {price}
+Estos son los datos del auto, busca el precio: {price} considerando el siguiente enganche del usuario: {budget}
+Agrega Emoji, se amigable y breve ademas muestra el texto en una forma facil de entender
 """
 
 FINANCING_ERROR_PROMPT = """
@@ -40,6 +42,8 @@ Mantén un tono amigable y profesional y se breve.
 SUMMARY_SHOW_VEHICLE = """
 Resume las carectisticas del siguiente vehiculo, mencionar que las dimensiones son metros, es importante mencionar el precio del vehiculo. 
 Sugiere si desea hacer financiamiento escriba financiar
+Y muestra un ejemplo de texto que el deba de escribir como 'Financiamiento con 50 mil pesos de enganche'
+Agrega Emoji, se amigable y breve
 """
 
 SUMMARY_FRIENDLY_PROMPT = """
@@ -53,4 +57,10 @@ Corrige los errores de redacción y devuelve la versión más probable.
 Ejemplo:
 Input: 'toyotaa corrola'
 Output: 'Toyota Corolla'
+"""
+
+
+
+BUDGET_PROMPT = """
+Obten el presupuesto del siguiente mensaje y regresalo respuesta
 """

@@ -65,7 +65,7 @@ ngrok http http://localhost:8000
 ### Run with Dockerfile
 
 ```
-docker build -t botimg .
+docker build -t bot_img .
 ```
 
 ```
@@ -77,6 +77,10 @@ docker run --name botcontainer --env-file .env -p 8000:8000 botimg
 
 ```
 docker run -d --name redis_container -p 6379:6379 redis_img 
+```
+
+```
+docker run -d --name redis_ia_container -p 6379:6379 redis_ia_img 
 ```
 
 
@@ -93,6 +97,7 @@ docker compose up
 
 #### Example env file
 ```
-OPENAI_API_KEY=SOMETHING
-TWILIO_TOKEN=SOMETHING
+OPENAI_API_KEY=xxxxxxxxxxx
+TWILIO_TOKEN=xxxxxxxxxxxxx
+REDIS_URL=xxxxxxxxxxxxxx
 ```

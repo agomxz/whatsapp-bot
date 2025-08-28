@@ -12,10 +12,11 @@ from app.services.chat_service import (
     handle_company_info,
     handle_vehicle_question,
     handle_recommendation,
+    handle_user_input,
 )
 from app.services.llm_service import LLMService
 from app.dependecies.dependency import get_twilio_service, get_llm_service
-from app.constants.coincidences import KAVAK_WEBSITE, USER_QUESTION
+from app.constants.coincidences import KAVAK_WEBSITE, USER_QUESTION, FINNANCING_OPTIONS
 from app.db import vectorstore, vectorstore_blog
 from fastapi import Form, Depends
 from langchain.schema import AIMessage, HumanMessage
@@ -52,14 +53,14 @@ def chat(request: ChatRequest, llm_service: LLMService = Depends(get_llm_service
         response = handle_welcome(llm)
 
     else:
-        if user_input == "1":
+        if user_input in ["1", "uno"]:
             response = handle_random_vehicle(user_id, vectorstore)
 
-        elif user_input == "2":
+        elif user_input in ["2", "dos"]:
             response = handle_vehicle_suggestion(user_input, chat_history, llm)
 
         else:
-            if "financiamiento" in user_input.lower():
+            if user_input in FINNANCING_OPTIONS:
                 response = handle_financing(user_id, llm)
 
             else:
@@ -100,27 +101,30 @@ def chat(
     llm_service: LLMService = Depends(get_llm_service),
 ):
     try:
-
+        logger.info(From)
+        
         llm = llm_service.get_llm()
-
+        
         user_id = From
-        user_input = Body
-
+        user_input = Body.lower()
+        
         chat_history = get_chat_memory(user_id)
 
         if not chat_history:
             response = handle_welcome(llm)
 
         else:
-            if user_input == "1":
+            if user_input in ["1", "uno"]:
                 response = handle_random_vehicle(user_id, vectorstore)
 
-            elif user_input == "2":
+            elif user_input in ["2", "dos"]:
                 response = handle_vehicle_suggestion(user_input, chat_history, llm)
 
             else:
-                if "financiamiento" in user_input.lower():
-                    response = handle_financing(user_id, llm)
+                if user_input in FINNANCING_OPTIONS:
+                    logger.info('FINANCIAMIENTO CASO!!')
+                    logger.info(user_id)
+                    response = handle_financing(user_id, user_input, llm)
 
                 else:
                     query = user_input.lower()
@@ -148,6 +152,7 @@ def chat(
         chat_history.append(ai_msg)
         chat_history = chat_history[-6:]
         save_chat_memory(user_id, chat_history)
+        twilio_service.send_message(response.content)
 
     except Exception as e:
         twilio_service.send_message("Agente no disponible")
