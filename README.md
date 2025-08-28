@@ -95,11 +95,11 @@ app.main:app --reload --port 8000
 
 ### Run with Dockerfile
 ```
-docker build -t bot_img .
+docker build -t chatbot_img .
 ```
 
 ```
-docker run --name botcontainer --env-file .env -p 8000:8000 botimg
+docker run --name chatbot_container --env-file .env -p 8000:8000 chatbot_img
 ```
 
 
