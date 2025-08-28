@@ -36,7 +36,7 @@ flowchart TD
     services_init[__init__.py]
     utils[utils/]
     utils_init[__init__.py]
-    env[.env Environment variables (Twilio SID, tokens, etc.)]
+    env[.env]
     requirements[requirements.txt Python dependencies]
     readme[README.md Project documentation]
 
