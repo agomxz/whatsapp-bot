@@ -115,6 +115,10 @@ ngrok http http://localhost:8000
 http://127.0.0.1:8000/docs
 ```
 
+### Config Twilio
+![Alt text](docs/twilio.jepg)
+
+
 ----
 ### How to run it with Docker-compose
 
