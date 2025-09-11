@@ -13,7 +13,7 @@ def load_web_page():
         web_docs = loader.load()
 
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=5000, chunk_overlap=50
+            chunk_size=10000, chunk_overlap=50
         )
 
         split_docs = text_splitter.split_documents(web_docs)

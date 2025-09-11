@@ -12,12 +12,11 @@ ask_to_blog = ConversationalRetrievalChain.from_llm(
 
 
 def ask_company_info(vectorstore, query: str):
-
-    results = vectorstore.similarity_search(query, k=4)
+    results = vectorstore.similarity_search(query, k=5)
 
     if not results:
-        return {"answer": "No se encontraron resultados."}
+        return {"answer": "No se encontraron resultados relevantes para tu consulta."}
 
-    answer_texts = [r.page_content for r in results]
-
-    return {"answer": "\n".join(answer_texts)}
+    final_answer = llm.predict(f"Responde basado en este contexto: {results}\n\nPregunta: {query}")
+    
+    return {"answer": final_answer}

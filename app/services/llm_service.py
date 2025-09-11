@@ -8,7 +8,7 @@ class LLMService:
         self.api_key = OPENAI_API_KEY
 
     def get_llm(self) -> ChatOpenAI:
-        return ChatOpenAI(model=self.model, api_key=self.api_key)
+        return ChatOpenAI(model=self.model, api_key=self.api_key, temperature=0.7)
 
     def invoke(self, prompt: str):
         return self.get_llm().invoke(prompt)

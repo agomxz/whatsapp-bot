@@ -19,4 +19,4 @@ vectorstore_blog = Chroma(
 
 
 retriever_vehicle = vectorstore.as_retriever()
-retriever_blog = vectorstore_blog.as_retriever(search_kwargs={"k": 3})
+retriever_blog = vectorstore_blog.as_retriever(search_kwargs={"k": 5})

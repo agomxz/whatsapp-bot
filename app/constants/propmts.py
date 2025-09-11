@@ -47,7 +47,8 @@ Agrega Emoji, se amigable y breve
 """
 
 SUMMARY_FRIENDLY_PROMPT = """
-Resume de manera amigable el siguiente texto, en primera persona: {text}
+Resume y parafrasea de manera amigable el siguiente texto, en primera persona: {text}
+Agrega Emoji, se amigable y breve
 """
 
 
@@ -63,3 +64,12 @@ Output: 'Toyota Corolla'
 BUDGET_PROMPT = """
 Obten el presupuesto del siguiente mensaje y regresalo respuesta
 """
+
+
+CLOSE_CHAT_PROMPT = """
+Genera un mensaje de despedida  generico mencionado que esperas que vuelva pronto a la agencia automotriz Kavak
+Omite mencionar el nombre
+Mantén un tono amigable y profesional y se breve de 50 palabras.
+Agrega Emoji
+"""
+

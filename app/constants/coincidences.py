@@ -8,6 +8,14 @@ KAVAK_WEBSITE = [
     "blog",
     "kavak",
     "pagina",
+    "contacto",
+    "agencia",
+    "agencias",
+    "sucursales",
+    "sede",
+    "sedes",
+    "ubicacion",
+    "ubicaciones",
 ]
 
 USER_QUESTION = [
@@ -29,4 +37,10 @@ FINNANCING_OPTIONS = [
     "presupuesto",
     "enganche",
     "comprar",
+]
+
+USER_CLOSE_CHAT = [
+    "adios",
+    "salir",
+    "cerrar"
 ]

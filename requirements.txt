@@ -9,10 +9,10 @@ langchain-openai==0.3.31
 langchain-community==0.3.27
 langchain-experimental==0.3.4
 twilio==9.7.1
-#psycopg2-binary==2.9.10
 python-multipart==0.0.20
 pre-commit==3.6.2
 black==25.1.0
 flake8==7.3.0
 redis==6.2.0
 pandas==2.3.2
+beautifulsoup4==4.12.3

@@ -1,21 +1,10 @@
-from fastapi import APIRouter, status
+from fastapi import APIRouter, status, HTTPException
 from app.utils.twilio import TwilioService
-from app.redis_memory import (
-    get_chat_memory,
-    save_chat_memory,
-)
-from app.services.chat_service import (
-    handle_welcome,
-    handle_random_vehicle,
-    handle_vehicle_suggestion,
-    handle_financing,
-    handle_company_info,
-    handle_vehicle_question,
-    handle_recommendation,
-)
 from app.services.llm_service import LLMService
-from app.dependecies.dependency import get_twilio_service, get_llm_service
-from app.constants.coincidences import KAVAK_WEBSITE, USER_QUESTION, FINNANCING_OPTIONS
+from app.services.chat_service import ChatService
+from app.redis_memory import RedisMemoryManager
+from app.dependecies.dependency import get_twilio_service, get_llm_service, get_redis_memory_manager, get_chat_service
+from app.constants.coincidences import KAVAK_WEBSITE, USER_QUESTION, FINNANCING_OPTIONS, USER_CLOSE_CHAT
 from app.db import vectorstore, vectorstore_blog
 from fastapi import Form, Depends
 from langchain.schema import AIMessage, HumanMessage
@@ -32,7 +21,18 @@ def home() -> None:
 
 @router.post("/message", summary="Test Twilio Sandbox", status_code=status.HTTP_200_OK)
 def message(twilio_service: TwilioService = Depends(get_twilio_service)) -> None:
-    twilio_service.send_message("Hello from backend")
+    """
+    Send a test message to the Twilio sandbox in order to check if the connection is working
+    """
+    
+    try:
+        twilio_service.send_message("Hello from backend")
+    except Exception as e:
+        logger.error("Error sending message: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to send message"
+        )
 
 
 @router.post(
@@ -40,104 +40,64 @@ def message(twilio_service: TwilioService = Depends(get_twilio_service)) -> None
     summary="Local Whatsapp chatbot",
     status_code=status.HTTP_200_OK,
 )
-def chat(request: ChatRequest, llm_service: LLMService = Depends(get_llm_service)):
-    llm = llm_service.get_llm()
-
-    user_id = request.user_id
-    user_input = request.user_input
-
-    chat_history = get_chat_memory(user_id)
-
-    if not chat_history:
-        response = handle_welcome(llm)
-
-    else:
-        if user_input in ["1", "uno"]:
-            response = handle_random_vehicle(user_id, vectorstore)
-
-        elif user_input in ["2", "dos"]:
-            response = handle_vehicle_suggestion(user_input, chat_history, llm)
-
-        else:
-            if user_input in FINNANCING_OPTIONS:
-                response = handle_financing(user_id, llm)
-
-            else:
-                query = user_input.lower()
-                if any(word in query for word in KAVAK_WEBSITE):
-                    response = handle_company_info(user_input, llm, vectorstore_blog)
-
-                elif any(word in query for word in USER_QUESTION):
-                    response = handle_vehicle_question(user_input, user_id, vectorstore)
-
-                else:
-                    response = handle_recommendation(user_input, chat_history, llm)
-
-    user_msg = HumanMessage(content=str(user_input))
-
-    if isinstance(response, dict):
-        ai_msg = AIMessage(content=str(response.get("answer", "")))
-    else:
-        ai_msg = AIMessage(content=str(response))
-
-    chat_history.append(user_msg)
-    chat_history.append(ai_msg)
-    chat_history = chat_history[-6:]
-    save_chat_memory(user_id, chat_history)
-
-    return {"response": response}
-
-
-@router.post(
-    "/twilio",
-    summary="Whatsapp chatbot",
-    status_code=status.HTTP_200_OK,
-)
-def twilio_chat(
-    From: str = Form(...),
-    Body: str = Form(...),
-    twilio_service: TwilioService = Depends(get_twilio_service),
+def chat(
+    request: ChatRequest, 
     llm_service: LLMService = Depends(get_llm_service),
+    chat_service: ChatService = Depends(get_chat_service),
+    redis_memory_manager: RedisMemoryManager = Depends(get_redis_memory_manager)
 ):
+    """
+    Handle a local chat request from a user.
+    """
     try:
-        logger.info(From)
-
         llm = llm_service.get_llm()
 
-        user_id = From
-        user_input = Body.lower()
+        user_id = request.user_id
+        user_input = request.user_input
 
-        chat_history = get_chat_memory(user_id)
+        logger.info("User id: %s", user_id)
+        logger.info("User input: %s", user_input)
+
+        chat_history = redis_memory_manager.get_chat_memory(user_id)
 
         if not chat_history:
-            response = handle_welcome(llm)
+            logger.info("First message")
+            response = chat_service.handle_welcome(llm)
 
         else:
             if user_input in ["1", "uno"]:
-                response = handle_random_vehicle(user_id, vectorstore)
+                logger.info("Random vehicle")
+                response = chat_service.handle_random_vehicle(user_id, vectorstore)
 
             elif user_input in ["2", "dos"]:
-                response = handle_vehicle_suggestion(user_input, chat_history, llm)
+                logger.info("Vehicle suggestion")
+                response = chat_service.handle_vehicle_suggestion(user_input, chat_history, llm)
 
             else:
+                if any(word in user_input.lower() for word in FINNANCING_OPTIONS):
 
-                if any(option in user_input for option in FINNANCING_OPTIONS):
-                    response = handle_financing(user_id, user_input, llm)
+                    logger.info("Financing option")
+                    response = chat_service.handle_financing(user_id, user_input, llm)
 
                 else:
                     query = user_input.lower()
+
                     if any(word in query for word in KAVAK_WEBSITE):
-                        response = handle_company_info(
-                            user_input, llm, vectorstore_blog
-                        )
+                        logger.info("Company info")
+                        response = chat_service.handle_company_info(user_input, llm, vectorstore_blog)
 
                     elif any(word in query for word in USER_QUESTION):
-                        response = handle_vehicle_question(
-                            user_input, user_id, vectorstore
-                        )
+                        logger.info("Vehicle question")
+                        response = chat_service.handle_vehicle_question(user_input, user_id, vectorstore)
+
+                    elif any(word in query for word in USER_CLOSE_CHAT):
+                        logger.info("Close chat")
+                        redis_memory_manager.clean_user_chat(user_id)
+                        response = chat_service.handle_close_chat(user_id, llm)
 
                     else:
-                        response = handle_recommendation(user_input, chat_history, llm)
+                        logger.info("Recommendation")
+                        response = chat_service.handle_recommendation(user_input, chat_history, llm)
 
         user_msg = HumanMessage(content=str(user_input))
 
@@ -149,8 +109,97 @@ def twilio_chat(
         chat_history.append(user_msg)
         chat_history.append(ai_msg)
         chat_history = chat_history[-6:]
-        save_chat_memory(user_id, chat_history)
+        redis_memory_manager.save_chat_memory(user_id, chat_history)
+
+        return {"response": response}
+
+    except Exception as e:
+        logger.error("Unexpected error: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Failed to process chat"
+        )
+
+
+@router.post(
+    "/twilio",
+    summary="Whatsapp chatbot",
+    status_code=status.HTTP_200_OK,
+)
+def twilio_chat(
+    From: str = Form(...),
+    Body: str = Form(...),
+    twilio_service: TwilioService = Depends(get_twilio_service),
+    chat_service: ChatService = Depends(get_chat_service),
+    redis_memory_manager: RedisMemoryManager = Depends(get_redis_memory_manager),
+    llm_service: LLMService = Depends(get_llm_service),
+):
+    try:
+        """
+        Chatbot webhook for Twilio
+        """
+
+        llm = llm_service.get_llm()
+
+        user_id = From
+        user_input = Body.lower()
+
+        logger.info("User id: %s", user_id)
+        logger.info("User input: %s", user_input)
+        
+        chat_history = redis_memory_manager.get_chat_memory(user_id)
+
+        if not chat_history:
+            response = chat_service.handle_welcome(llm)
+
+        else:
+            if user_input in ["1", "uno"]:
+                response = chat_service.handle_random_vehicle(user_id, vectorstore)
+
+            elif user_input in ["2", "dos"]:
+                response = chat_service.handle_vehicle_suggestion(user_input, chat_history, llm)
+
+            else:
+                if any(word in user_input.lower() for word in FINNANCING_OPTIONS):
+
+                    logger.info("Financing option")
+                    response = chat_service.handle_financing(user_id, user_input, llm)
+
+                else:
+                    query = user_input.lower()
+                    logger.info("Query: %s", query)
+
+                    if any(word in query for word in KAVAK_WEBSITE):
+                        logger.info("Company info")
+                        response = chat_service.handle_company_info(user_input, llm, vectorstore_blog)
+
+                    elif any(word in query for word in USER_QUESTION):
+                        logger.info("Vehicle question")
+                        response = chat_service.handle_vehicle_question(user_input, user_id, vectorstore)
+
+                    elif any(word in query for word in USER_CLOSE_CHAT):
+                        logger.info("Close chat")
+                        redis_memory_manager.clean_user_chat(user_id)
+                        response = chat_service.handle_close_chat(user_id, llm)
+
+                    else:
+                        logger.info("Recommendation")
+                        response = chat_service.handle_recommendation(user_input, chat_history, llm)
+
+        user_msg = HumanMessage(content=str(user_input))
+
+        if isinstance(response, dict):
+            ai_msg = AIMessage(content=str(response.get("answer", "")))
+        else:
+            ai_msg = AIMessage(content=str(response))
+
+        chat_history.append(user_msg)
+        chat_history.append(ai_msg)
+        chat_history = chat_history[-6:]
+        redis_memory_manager.save_chat_memory(user_id, chat_history)        
         twilio_service.send_message(response.content)
+
+        return {"response": response}
 
     except Exception as e:
         twilio_service.send_message("Agente no disponible")
