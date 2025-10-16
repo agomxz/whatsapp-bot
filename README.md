@@ -1,22 +1,57 @@
-# 🚗 WhatsApp Car Sales Bot
+# Item Comparation
 
-This project is a **WhatsApp Chatbot** built with **FastAPI** and **OpenAI models** to help automate the sales process of car-related products.  
-The bot connects to the **Twilio Sandbox**, receives customer messages, and responds intelligently using **LangChain**.
+This project is a **FastAPI** backend and uses **Ollama** models to help retrive information from items, and responds intelligently using **LangChain**.
 ---
 
 ## ✨ Features
-- ✅ Integration with **Twilio Sandbox**  
-- ✅ Powered by **OpenAI models** for natural conversations  
+- ✅ Powered by **Ollama** for natural conversations  
 - ✅ Built with **FastAPI** for scalability  
 - ✅ `.env` configuration support (via `python-dotenv`)  
-- ✅ Easily extendable to support multiple products and categories  
-- ✅ Get a suggestion vehicle 
 - ✅ Ask for vehicle using natural lenguage
-- ✅ Ask for finacing using a budget
-- ✅ Ask for company information
-
 
 ---
+
+## 🛠️ Requeriments
+- Ollama model runing
+- Python 
+
+
+You need to have Ollama installed in your system in order to run this project.
+
+## How to run Ollama Model
+```
+ollama pull llama3
+```
+
+
+## How to run local API
+```
+python3 -m venv venv
+```
+
+```
+pip install -r requirements.txt
+```
+
+```
+uvicorn app.main:app --reload --port 8000
+```
+
+### Run with Dockerfile
+```
+docker build -t chatbot_img .
+```
+
+```
+docker run --name chatbot_container --env-file .env -p 8000:8000 chatbot_img
+```
+
+**Now access to use API**
+```
+http://127.0.0.1:8000/docs
+```
+
+
 
 ## 📂 Project Structure
 
@@ -64,64 +99,9 @@ graph TD
 
 
 
-## 🛠️ Tools
-- OpeanAI Account
-- Twilio Account
-- Ngrok Account (To expose API)
+
 
 ---
-
-# How to run local
-```
-python3 -m venv venv
-```
-
-```
-pip install -r requirements.txt
-```
-
-```
-uvicorn app.main:app --reload --port 8000
-```
-
-### Run with Dockerfile
-```
-docker build -t chatbot_img .
-```
-
-```
-docker run --name chatbot_container --env-file .env -p 8000:8000 chatbot_img
-```
-
-
-### Use ngrok to expose webhook
-**Note: Use Ngrok token**
-```
-ngrok http http://localhost:8000
-```
-
-
-**Now access to use API**
-```
-http://127.0.0.1:8000/docs
-```
-
-### Config Twilio
-Access to Twilio account and add the ngrok endpoint to connet with Whatsapp.
-![alt text](docs/twilio.png)
-
-----
-### How to run it with Docker-compose
-
-```
-docker compose build
-```
-
-```
-docker compose up
-```
-
-
 
 #### Example env file
 ```

@@ -16,3 +16,4 @@ flake8==7.3.0
 redis==6.2.0
 pandas==2.3.2
 beautifulsoup4==4.12.3
+ollama==0.1.1
