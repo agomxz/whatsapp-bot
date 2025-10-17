@@ -6,23 +6,26 @@ from typing import Optional, Any
 
 load_dotenv()
 
+
 class MissingEnvironmentVariableError(Exception):
     """Raised when a required environment variable is missing."""
+
     def __init__(self, var_name: str):
         self.var_name = var_name
         self.message = f"Required environment variable '{var_name}' is not set."
         super().__init__(self.message)
 
+
 def get_required_env(var_name: str, default: Any = None) -> str:
     """Get an environment variable or raise an error if not found.
-    
+
     Args:
         var_name: Name of the environment variable
         default: Default value to return if variable is not found (raises error if None)
-        
+
     Returns:
         The value of the environment variable or the default value
-        
+
     Raises:
         MissingEnvironmentVariableError: If the environment variable is not set and no default is provided
     """

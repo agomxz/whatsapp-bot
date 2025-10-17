@@ -3,13 +3,15 @@ from starlette.middleware.cors import CORSMiddleware
 from app.routes import agent
 from contextlib import asynccontextmanager
 
-# # Create Chroma DataBases
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # load_data()
-    yield
 
-app = FastAPI(lifespan=lifespan, title="IA Agent")
+# # Create Chroma DataBases
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     # load_data()
+#     yield
+
+
+app = FastAPI(title="IA Agent")
 
 app.include_router(agent.router, prefix="/agent", tags=["IA Agent"])
 

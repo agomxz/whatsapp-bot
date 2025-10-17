@@ -3,9 +3,12 @@ from typing import Optional
 import logging
 from app.config import REDIS_HOST, REDIS_PORT, logger
 
+
 class RedisConnectionError(Exception):
     """Custom exception for Redis connection errors."""
+
     pass
+
 
 class RedisManager:
     """
@@ -13,16 +16,17 @@ class RedisManager:
     Provides a single point of configuration for Redis connections
     and ensures only one connection pool is used throughout the application.
     """
+
     _instance = None
     _client = None
-    
+
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super(RedisManager, cls).__new__(cls)
             # Initialize the Redis client on first instantiation
             cls._instance._initialize_client()
         return cls._instance
-    
+
     def _initialize_client(self):
         """Initialize the Redis client with connection pooling."""
         try:
@@ -34,7 +38,7 @@ class RedisManager:
                 socket_timeout=5,
                 decode_responses=True,
                 retry_on_timeout=True,
-                max_connections=20  # Adjust based on your needs
+                max_connections=20,  # Adjust based on your needs
             )
             # Test the connection
             self._client.ping()
@@ -45,18 +49,18 @@ class RedisManager:
         except Exception as e:
             logger.error(f"Unexpected error initializing Redis: {str(e)}")
             raise
-    
+
     @property
     def client(self) -> redis.Redis:
         """Get the Redis client instance."""
         if self._client is None:
             self._initialize_client()
         return self._client
-    
+
     def get_connection(self) -> redis.Redis:
         """Get a Redis connection from the pool."""
         return self.client
-    
+
     def test_connection(self) -> bool:
         """Test if the Redis connection is working."""
         try:
@@ -68,6 +72,7 @@ class RedisManager:
 
 # Create a singleton instance
 redis_manager = RedisManager()
+
 
 def get_redis() -> redis.Redis:
     """
