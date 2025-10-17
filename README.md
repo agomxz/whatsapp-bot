@@ -1,6 +1,8 @@
 # Item Comparation
+---
 
 This project is a **FastAPI** backend and uses **Ollama** models to help retrive information from items, and responds intelligently using **LangChain**.
+
 ---
 
 ## ✨ Features

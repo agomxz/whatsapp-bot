@@ -1,6 +1,7 @@
 [
       {
         "id": 1,
+        "name": "Toyota Corolla 2021",
         "brand": "Toyota",
         "model": "Corolla",
         "year": 2021,
@@ -8,10 +9,14 @@
         "price": 19500,
         "fuel_type": "Gasoline",
         "mileage_km": 28000,
-        "transmission": "Automatic"
+        "transmission": "Automatic",
+        "image_url": "https://example.com/images/toyota-corolla-2021.jpg",
+        "description": "Reliable and fuel-efficient compact sedan with modern features and comfortable interior.",
+        "rating": 4.5
       },
       {
         "id": 2,
+        "name": "Tesla Model 3 2023",
         "brand": "Tesla",
         "model": "Model 3",
         "year": 2023,
@@ -19,10 +24,14 @@
         "price": 42000,
         "fuel_type": "Electric",
         "mileage_km": 12000,
-        "transmission": "Automatic"
+        "transmission": "Automatic",
+        "image_url": "https://example.com/images/tesla-model3-2023.jpg",
+        "description": "Premium electric vehicle with cutting-edge technology, impressive range, and autopilot features.",
+        "rating": 4.8
       },
       {
         "id": 3,
+        "name": "Ford Mustang 2019",
         "brand": "Ford",
         "model": "Mustang",
         "year": 2019,
@@ -30,10 +39,14 @@
         "price": 32000,
         "fuel_type": "Gasoline",
         "mileage_km": 45000,
-        "transmission": "Manual"
+        "transmission": "Manual",
+        "image_url": "https://example.com/images/ford-mustang-2019.jpg",
+        "description": "Iconic American muscle car with powerful performance and classic styling.",
+        "rating": 4.6
       },
       {
         "id": 4,
+        "name": "Honda Civic 2022",
         "brand": "Honda",
         "model": "Civic",
         "year": 2022,
@@ -41,10 +54,14 @@
         "price": 23000,
         "fuel_type": "Hybrid",
         "mileage_km": 15000,
-        "transmission": "Automatic"
+        "transmission": "Automatic",
+        "image_url": "https://example.com/images/honda-civic-2022.jpg",
+        "description": "Efficient and reliable hybrid sedan with modern features and excellent fuel economy.",
+        "rating": 4.4
       },
       {
         "id": 5,
+        "name": "Chevrolet Silverado 2020",
         "brand": "Chevrolet",
         "model": "Silverado",
         "year": 2020,
@@ -52,7 +69,10 @@
         "price": 35500,
         "fuel_type": "Diesel",
         "mileage_km": 52000,
-        "transmission": "Automatic"
+        "transmission": "Automatic",
+        "image_url": "https://example.com/images/chevrolet-silverado-2020.jpg",
+        "description": "Powerful and durable full-size pickup truck with excellent towing capacity and comfortable cabin.",
+        "rating": 4.3
       }
 ]
   
