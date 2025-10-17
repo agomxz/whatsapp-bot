@@ -1,15 +1,14 @@
-from fastapi import APIRouter, status, HTTPException, Depends, Query
-from typing import List, Dict, Optional, Any
+from fastapi import APIRouter, status, HTTPException, Query
+from typing import List, Dict
 import json
 import uuid
-import logging
 
 # LangChain imports
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
 
 # Local imports
-from app.config import logger, LLM_MODEL
+from app.config import logger
 from app.schemas.chat import ChatRequest, ChatResponse, Message
 from app.services.redis_chat_service import RedisChatService
 from app.services.redis_manager import get_redis, RedisConnectionError
@@ -83,7 +82,6 @@ async def test_redis():
         )
 
 
-
 @router.get("/generate/{prompt}")
 async def generate(prompt: str):
     """Simple endpoint to test the LLM model without conversation context"""
@@ -99,7 +97,6 @@ async def generate(prompt: str):
         )
 
 
-
 @router.get("/items/")
 def get_items(ids: List[int] = Query(default=None)):
     """Fetch data from fake database"""
@@ -112,18 +109,17 @@ def get_items(ids: List[int] = Query(default=None)):
     return products
 
 
-
 @router.post("/compare/")
 async def compare_items(ids: List[int]):
     """
     Compare items using LLM with LangChain manager.
-    
+
     Args:
         ids: List of product IDs to compare (at least 2 required)
-        
+
     Returns:
         JSON with comparison result
-        
+
     Raises:
         HTTPException: If less than 2 valid item IDs are provided
     """
@@ -132,14 +128,13 @@ async def compare_items(ids: List[int]):
 
     if len(selected) < 2:
         raise HTTPException(
-            status_code=400, 
-            detail="Please provide at least two valid item IDs"
+            status_code=400, detail="Please provide at least two valid item IDs"
         )
 
     try:
         # Get LLM instance from LangChain manager
         llm = langchain_manager.get_llm()
-        
+
         # Create a comparison chain
         prompt = PromptTemplate(
             input_variables=["items"],
@@ -155,25 +150,24 @@ async def compare_items(ids: List[int]):
                 "Format your response with clear sections and bullet points for better readability."
             ),
         )
-        
+
         chain = LLMChain(llm=llm, prompt=prompt)
         items_text = json.dumps(selected, indent=2, ensure_ascii=False)
-        
+
         # Generate comparison using the chain
         result = await chain.arun(items=items_text)
-        
+
         return {
             "comparison": result,
-            "compared_items": [{"id": p["id"], "name": p["name"]} for p in selected]
+            "compared_items": [{"id": p["id"], "name": p["name"]} for p in selected],
         }
-        
+
     except Exception as e:
         logger.error(f"Error in compare endpoint: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail=f"An error occurred while generating the comparison: {str(e)}"
+            detail=f"An error occurred while generating the comparison: {str(e)}",
         )
-
 
 
 @router.post("/chat/", response_model=ChatResponse, summary="Chat with the AI")
