@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "whatsapp-bot"
+version = "0.1.0"
+description = "WhatsApp Bot with FastAPI and LangChain"
+requires-python = ">=3.8"
+dependencies = [
+    "fastapi==0.112.2",
+    "uvicorn[standard]==0.34.0",
+    "requests==2.32.3",
+    "python-dotenv==1.0.1",
+    "langchain==0.3.27",
+    "langchain-openai==0.3.31",
+    "langchain-community==0.3.27",
+    "langchain-experimental==0.3.4",
+    "python-multipart==0.0.20",
+    "pre-commit==3.6.2",
+    "black==25.1.0",
+    "flake8==7.3.0",
+    "redis==6.2.0",
+    "beautifulsoup4==4.12.3",
+    "ollama==0.6.0",
+    "pytest==8.2.2",
+    "pytest-asyncio==0.23.7",
+    "httpx==0.27.0",
+    "pytest-cov==4.1.0",
+    "faiss-cpu==1.12.0"
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+    "black",
+    "flake8",
+    "pre-commit"
+]

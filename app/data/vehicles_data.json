@@ -73,6 +73,80 @@
         "image_url": "https://example.com/images/chevrolet-silverado-2020.jpg",
         "description": "Powerful and durable full-size pickup truck with excellent towing capacity and comfortable cabin.",
         "rating": 4.3
-      }
+      },
+  {
+    "id": 6,
+    "name": "BMW X5 2022",
+    "brand": "BMW",
+    "model": "X5",
+    "year": 2022,
+    "color": "Black Sapphire",
+    "price": 58900,
+    "fuel_type": "Plug-in Hybrid",
+    "mileage_km": 18000,
+    "transmission": "Automatic",
+    "image_url": "https://example.com/images/bmw-x5-2022.jpg",
+    "description": "Luxury midsize SUV with premium interior, advanced technology, and powerful hybrid performance.",
+    "rating": 4.7
+  },
+  {
+    "id": 7,
+    "name": "Toyota RAV4 2023",
+    "brand": "Toyota",
+    "model": "RAV4",
+    "year": 2023,
+    "color": "Silver",
+    "price": 31500,
+    "fuel_type": "Hybrid",
+    "mileage_km": 8500,
+    "transmission": "Automatic",
+    "image_url": "https://example.com/images/toyota-rav4-2023.jpg",
+    "description": "Popular compact SUV with excellent fuel efficiency, spacious interior, and advanced safety features.",
+    "rating": 4.6
+  },
+  {
+    "id": 8,
+    "name": "Porsche 911 Carrera 2021",
+    "brand": "Porsche",
+    "model": "911 Carrera",
+    "year": 2021,
+    "color": "Guards Red",
+    "price": 105000,
+    "fuel_type": "Gasoline",
+    "mileage_km": 12500,
+    "transmission": "PDK Automatic",
+    "image_url": "https://example.com/images/porsche-911-2021.jpg",
+    "description": "Iconic sports car with precision engineering, exhilarating performance, and timeless design.",
+    "rating": 4.9
+  },
+  {
+    "id": 9,
+    "name": "Subaru Outback 2022",
+    "brand": "Subaru",
+    "model": "Outback",
+    "year": 2022,
+    "color": "Green",
+    "price": 32995,
+    "fuel_type": "Gasoline",
+    "mileage_km": 22500,
+    "transmission": "CVT Automatic",
+    "image_url": "https://example.com/images/subaru-outback-2022.jpg",
+    "description": "Versatile crossover with standard all-wheel drive, generous ground clearance, and rugged capability.",
+    "rating": 4.5
+  },
+  {
+    "id": 10,
+    "name": "Mercedes-Benz EQS 2023",
+    "brand": "Mercedes-Benz",
+    "model": "EQS",
+    "year": 2023,
+    "color": "Obsidian Black",
+    "price": 104400,
+    "fuel_type": "Electric",
+    "mileage_km": 7500,
+    "transmission": "Automatic",
+    "image_url": "https://example.com/images/mercedes-eqs-2023.jpg",
+    "description": "Luxury electric sedan with cutting-edge technology, exceptional range, and opulent interior.",
+    "rating": 4.8
+  }
 ]
-  

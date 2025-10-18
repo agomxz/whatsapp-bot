@@ -30,9 +30,9 @@ services:
       - redis
       - ollama
     environment:
-      - REDIS_HOST=localhost  # Using the service name instead of localhost
-      - REDIS_PORT=6380   # Using the default Redis port inside the container
-      - OLLAMA_URL=http://ollama:11434
+      - REDIS_HOST=redis      
+      - REDIS_PORT=6379       
+      - OLLAMA_URL=http://ollama:11434  
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     volumes:
       - .:/app

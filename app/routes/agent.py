@@ -13,9 +13,14 @@ from app.schemas.chat import ChatRequest, ChatResponse, Message
 from app.services.redis_chat_service import RedisChatService
 from app.services.redis_manager import get_redis, RedisConnectionError
 from app.services.langchain_manager import langchain_manager
+from app.services.vehicle_service import vehicle_service
 from app.utils.loader_data import load_products
 
+from app.utils.utils import is_vehicle_query
+from app.constants.propmts import COMPARE_PROMPT
+
 router = APIRouter()
+
 
 # Initialize chat service with RedisManager
 chat_service = RedisChatService()
@@ -38,29 +43,25 @@ async def test_redis():
     Note: This endpoint is for testing purposes only and should be disabled in production.
     """
     try:
-        # Get Redis client from the manager
         redis_client = get_redis()
 
         # Test connection
         if not redis_client.ping():
             raise RedisConnectionError("Redis ping failed")
 
-        # Get and log current keys
         keys_before = redis_client.dbsize()
         logger.info(f"Keys before flush: {keys_before}")
 
-        # Flush the database (use with caution in production!)
-        redis_client.flushdb()
+        # redis_client.flushdb()
 
-        # Get and log keys after flush
-        keys_after = redis_client.dbsize()
-        logger.info(f"Keys after flush: {keys_after}")
+        # keys_after = redis_client.dbsize()
+        # logger.info(f"Keys after flush: {keys_after}")
 
         return {
             "status": "success",
             "message": "Redis connection and operations successful",
             "keys_before_flush": keys_before,
-            "keys_after_flush": keys_after,
+            # "keys_after_flush": keys_after,
             "connection_info": {
                 "host": redis_client.connection_pool.connection_kwargs.get("host"),
                 "port": redis_client.connection_pool.connection_kwargs.get("port"),
@@ -83,9 +84,10 @@ async def test_redis():
 
 
 @router.get("/generate/{prompt}")
-async def generate(prompt: str):
+async def generate(prompt: str) -> Dict[str, str]:
     """Simple endpoint to test the LLM model without conversation context"""
     try:
+        logger.info(f"Generating response for prompt: {prompt}")
         llm = langchain_manager.get_llm()
         response = llm(prompt)
         return {"response": response}
@@ -99,7 +101,7 @@ async def generate(prompt: str):
 
 @router.get("/items/")
 def get_items(ids: List[int] = Query(default=None)):
-    """Fetch data from fake database"""
+    """Fetch data from fake database using product IDs"""
     products = load_products()
     if ids:
         filtered = [p for p in products if p["id"] in ids]
@@ -138,17 +140,7 @@ async def compare_items(ids: List[int]):
         # Create a comparison chain
         prompt = PromptTemplate(
             input_variables=["items"],
-            template=(
-                "You are a helpful shopping assistant. Compare the following items in detail:\n"
-                "{items}\n\n"
-                "Provide a detailed comparison considering these aspects:\n"
-                "1. Key features and specifications\n"
-                "2. Price vs value comparison\n"
-                "3. Ratings and reviews summary\n"
-                "4. Best use cases for each item\n"
-                "5. Overall recommendation on which is better and why\n\n"
-                "Format your response with clear sections and bullet points for better readability."
-            ),
+            template=(COMPARE_PROMPT),
         )
 
         chain = LLMChain(llm=llm, prompt=prompt)
@@ -181,27 +173,89 @@ async def chat(chat_request: ChatRequest):
     """
     try:
         # Generate a new conversation ID if not provided
+        logger.info(f"Chat request: {chat_request}")
         conversation_id = chat_request.conversation_id or f"conv_{str(uuid.uuid4())}"
 
         # Get conversation history
+        logger.info(f"Conversation ID: {conversation_id}")
         history = await chat_service.get_conversation_history(conversation_id)
 
         # Add user message to history
+        logger.info(f"User message: {chat_request.message}")
         user_message = Message(role="user", content=chat_request.message)
         await chat_service.save_message(conversation_id, user_message.dict())
 
         # Format the conversation history for the model
-        formatted_history = "\n".join(
-            [f"{msg['role'].capitalize()}: {msg['content']}" for msg in history]
-        )
+        logger.info(f"Conversation history: {history}")
+        # formatted_history = "\n".join(
+        #     [f"{msg['role'].capitalize()}: {msg['content']}" for msg in history]
+        # )
 
         # Get conversation chain from LangChain manager
-        conversation_chain = langchain_manager.get_chain("conversation")
+        # conversation_chain = langchain_manager.get_chain("conversation")
 
-        # Generate response using the conversation chain
-        response = conversation_chain.predict(
-            input=chat_request.message, chat_history=formatted_history
-        )
+        # Check if this is a vehicle-related query
+        if is_vehicle_query(chat_request.message):
+            logger.info("Vehicle-related query detected, using RAG...")
+
+            # Get relevant vehicle information using RAG
+            logger.info("Searching for relevant vehicles...")
+            relevant_vehicles = vehicle_service.search_vehicles(
+                chat_request.message, k=3
+            )
+
+            if relevant_vehicles:
+                logger.info(f"Found {len(relevant_vehicles)} relevant vehicles")
+                # Format the context from relevant vehicles
+                context = "\n\n".join(
+                    [
+                        f"Vehicle: {v['name']}\n"
+                        f"Price: ${v['price']:,}\n"
+                        f"Year: {v['year']}\n"
+                        # f"Mileage: {v['mileage_km']:,} km\n"
+                        f"Fuel Type: {v['fuel_type']}\n"
+                        f"Transmission: {v['transmission']}\n"
+                        # f"Description: {v['description']}"
+                        for v in relevant_vehicles
+                    ]
+                )
+
+                # Get RAG chain and generate response
+                rag_chain = langchain_manager.get_rag_chain()
+                response = rag_chain.predict(
+                    context=context, question=chat_request.message
+                )
+                logger.info("Generated RAG response")
+            else:
+                response = "I couldn't find any vehicles matching your query. Could you provide more details?"
+                logger.info("No relevant vehicles found for the query")
+
+        else:
+            # For non-vehicle queries, use llama3 to generate a response
+            logger.info("Non-vehicle query detected, generating response with llama3")
+            prompt = (
+                "You are a helpful assistant that specializes in vehicle information. "
+                'The user asked: "{user_query}"\n'
+                "Politely explain that you can only help with vehicle-related questions and provide "
+                "some examples of vehicle questions they could ask instead. Keep it friendly and helpful."
+            ).format(user_query=chat_request.message)
+
+            # Get the LLM instance and generate a response
+            llm = langchain_manager.get_llm()
+            response = llm.invoke(prompt)
+
+            # Ensure we have a response, fallback to default if needed
+            if (
+                not response or len(response.strip()) < 50
+            ):  # Simple check for empty or very short responses
+                response = (
+                    "I'm sorry, but I'm currently only able to assist with vehicle-related queries. "
+                    "Please ask me about vehicles, such as their models, prices, features, or availability.\n\n"
+                    "For example, you can ask:\n"
+                    "- Show me electric vehicles under $50,000\n"
+                    "- What Toyotas do you have available?\n"
+                    "- Find me a red car with low mileage"
+                )
 
         # Save assistant's response to history
         assistant_message = Message(role="assistant", content=response)

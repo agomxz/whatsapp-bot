@@ -8,112 +8,50 @@ This project is a **FastAPI** backend and uses **Ollama** models to help retrive
 ## ✨ Features
 - ✅ Powered by **Ollama** for natural conversations  
 - ✅ Built with **FastAPI** for scalability  
-- ✅ `.env` configuration support (via `python-dotenv`)  
-- ✅ Ask for vehicle using natural lenguage
-
+- ✅ Powered by **LangChain** for natural conversations  
 ---
 
+## 📚 Endpoints
+- GET `/agent/` : Health check endpoint.
+- GET `/agent/redis/` : Test Redis connection.
+- GET `/agent/generate/{prompt}` : Test Ollama model, generate response using user input.
+- GET `/agent/items/` : Fetch data from fake database.
+- POST `/agent/compare/` : Compare items using LLM with LangChain manager.
+- POST `/agent/chat/` : Chat endpoint that maintains conversation context using Redis.
+
+**Note:**
+- The `/agent/chat/` endpoint is designed to handle vehicle-related queries using RAG (Retrieval-Augmented Generation) to provide relevant vehicle information.
+- For other types of queries, the endpoint will use the LLM to generate a response.
+
+
 ## 🛠️ Requeriments
-- Ollama model runing
-- Python 
+- Docker    
+- Docker Compose
+- Python >= 3.12
 
 
-You need to have Ollama installed in your system in order to run this project.
+## 📚 How to use
+`docker compose build`
 
-## How to run Ollama Model
-```
-ollama pull llama3
-```
+`docker compose up`
 
-
-## How to run local API
-```
-python3 -m venv venv
-```
-
-```
-pip install -r requirements.txt
-```
-
-```
-uvicorn app.main:app --reload --port 8000
-```
-
-### Run with Dockerfile
-```
-docker build -t chatbot_img .
-```
-
-```
-docker run --name chatbot_container --env-file .env -p 8000:8000 chatbot_img
-```
 
 **Now access to use API**
 ```
 http://127.0.0.1:8000/docs
 ```
 
+**Note:**
+- To see more details about how to run the project see the run.md file.
 
 
-## 📂 Project Structure
+## 📂 Project Structure (GITHUB)
 
-```mermaid
-graph TD
-    A[app] --> B[constants]
-    A --> C[dependencies]
-    A --> D[routes]
-    A --> E[schemas]
-    A --> F[services]
-    A --> G[utils]
-    
-    B --> B2[coincidences.py]
-    B --> B3[errors.py]
-    B --> B4[messages.py]
-    B --> B5[prompts.py]
-    
-    C --> C2[dependency.py]
-    
-    D --> D2[bot.py]
-    
-    E --> E1a[chat_request.py]
-    E --> E1b[prompt.py]
-    
-    F --> F2[chat_service.py]
-    F --> F3[conversation_history.py]
-    F --> F4[llm_service.py]
-    F --> F5[rag_blog.py]
-    F --> F6[rag.py]
-    
-    G --> G1[__init__.py]
-    G --> G2[config.py]
-    G --> G3[db.py]
-    G --> G4[main.py]
-    G --> G5[redis_memory.py]
-    
-    style A fill:#e1f5fe
-    style B fill:#f3e5f5
-    style C fill:#e8f5e8
-    style D fill:#fff3e0
-    style E fill:#fbe9e7
-    style F fill:#e8eaf6
-    style G fill:#f1f8e9
+
+#### Example .env file
 ```
-
-
-
-
-
----
-
-#### Example env file
-```
-OPENAI_API_KEY=xxxx
-TWILIO_KEY=xxxx
-TWILIO_ACCOUNT_SID=xxxx
-REDIS_URL=xxxx
-TO_WHATSAPP=xxxx
-FROM_WHATSAPP=xxxx
-CHROMA_DIR=./chroma_db
-CHROMA_DB=autos
-CHROMA_DB_BLOG=blog
+REDIS_HOST=xxxx
+REDIS_PORT=xxxx
+OLLAMA_URL=xxxx
+OLLAMA_PORT=xxxx
 ```
