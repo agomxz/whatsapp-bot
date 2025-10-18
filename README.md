@@ -45,8 +45,10 @@ http://127.0.0.1:8000/docs
 - To see more details about how to run the project see the run.md file.
 
 
-## 📂 Project Structure (GITHUB)
+### 📂 Project Structure
 
+Also use precommit to format code with black and flake8
+![alt text](docs/precommit.png)
 
 #### Example .env file
 ```
