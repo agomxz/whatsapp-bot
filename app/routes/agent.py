@@ -1,5 +1,5 @@
 from fastapi import APIRouter, status, HTTPException, Query
-from typing import List, Dict
+from typing import List, Dict, Any
 import json
 import uuid
 
@@ -15,12 +15,16 @@ from app.services.redis_manager import get_redis, RedisConnectionError
 from app.services.langchain_manager import langchain_manager
 from app.services.vehicle_service import vehicle_service
 from app.utils.loader_data import load_products
+from app.schemas.items import VehiclesResponse
 
 from app.utils.utils import is_vehicle_query
-from app.constants.propmts import COMPARE_PROMPT
+from app.constants.propmts import (
+    COMPARE_PROMPT,
+    DATA_NOT_FOUND,
+    SUGGEST_RESPONSE_PROMPT,
+)
 
 router = APIRouter()
-
 
 # Initialize chat service with RedisManager
 chat_service = RedisChatService()
@@ -33,40 +37,34 @@ async def home() -> Dict[str, str]:
 
 
 @router.get("/redis/")
-async def test_redis():
+async def test_redis() -> Dict[str, Any]:
     """
     Test Redis connection and return basic info.
 
     This endpoint is useful for debugging and testing the Redis connection.
     It will show the number of keys before and after flushing the database.
 
-    Note: This endpoint is for testing purposes only and should be disabled in production.
+    Note: This endpoint is for testing purposes only
     """
     try:
         redis_client = get_redis()
 
-        # Test connection
         if not redis_client.ping():
             raise RedisConnectionError("Redis ping failed")
 
         keys_before = redis_client.dbsize()
         logger.info(f"Keys before flush: {keys_before}")
 
-        # redis_client.flushdb()
+        redis_client.flushdb()
 
-        # keys_after = redis_client.dbsize()
-        # logger.info(f"Keys after flush: {keys_after}")
+        keys_after = redis_client.dbsize()
+        logger.info(f"Keys after flush: {keys_after}")
 
         return {
             "status": "success",
             "message": "Redis connection and operations successful",
             "keys_before_flush": keys_before,
-            # "keys_after_flush": keys_after,
-            "connection_info": {
-                "host": redis_client.connection_pool.connection_kwargs.get("host"),
-                "port": redis_client.connection_pool.connection_kwargs.get("port"),
-                "db": redis_client.connection_pool.connection_kwargs.get("db"),
-            },
+            "keys_after_flush": keys_after,
         }
 
     except RedisConnectionError as e:
@@ -87,6 +85,13 @@ async def test_redis():
 async def generate(prompt: str) -> Dict[str, str]:
     """Simple endpoint to test the LLM model without conversation context"""
     try:
+
+        if not prompt or not prompt.strip():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Prompt cannot be empty. Please provide a valid input.",
+            )
+
         logger.info(f"Generating response for prompt: {prompt}")
         llm = langchain_manager.get_llm()
         response = llm(prompt)
@@ -100,19 +105,28 @@ async def generate(prompt: str) -> Dict[str, str]:
 
 
 @router.get("/items/")
-def get_items(ids: List[int] = Query(default=None)):
+def get_items(ids: List[int] = Query(default=None)) -> VehiclesResponse:
     """Fetch data from fake database using product IDs"""
-    products = load_products()
-    if ids:
-        filtered = [p for p in products if p["id"] in ids]
-        if not filtered:
-            raise HTTPException(status_code=404, detail="Items not found")
-        return filtered
-    return products
+    try:
+        products = load_products()
+        if ids:
+            filtered = [p for p in products if p["id"] in ids]
+            if not filtered:
+                raise HTTPException(status_code=404, detail="Items not found")
+            return VehiclesResponse(response=filtered)
+
+        return VehiclesResponse(response=products)
+
+    except Exception as e:
+        logger.error(f"Error fetching items: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error fetching items: {str(e)}",
+        )
 
 
 @router.post("/compare/")
-async def compare_items(ids: List[int]):
+async def compare_items(ids: List[int]) -> Dict[str, Any]:
     """
     Compare items using LLM with LangChain manager.
 
@@ -177,22 +191,12 @@ async def chat(chat_request: ChatRequest):
         conversation_id = chat_request.conversation_id or f"conv_{str(uuid.uuid4())}"
 
         # Get conversation history
-        logger.info(f"Conversation ID: {conversation_id}")
         history = await chat_service.get_conversation_history(conversation_id)
+        logger.info(f"Conversation history: {history}")
 
         # Add user message to history
-        logger.info(f"User message: {chat_request.message}")
         user_message = Message(role="user", content=chat_request.message)
         await chat_service.save_message(conversation_id, user_message.dict())
-
-        # Format the conversation history for the model
-        logger.info(f"Conversation history: {history}")
-        # formatted_history = "\n".join(
-        #     [f"{msg['role'].capitalize()}: {msg['content']}" for msg in history]
-        # )
-
-        # Get conversation chain from LangChain manager
-        # conversation_chain = langchain_manager.get_chain("conversation")
 
         # Check if this is a vehicle-related query
         if is_vehicle_query(chat_request.message):
@@ -206,56 +210,41 @@ async def chat(chat_request: ChatRequest):
 
             if relevant_vehicles:
                 logger.info(f"Found {len(relevant_vehicles)} relevant vehicles")
+
                 # Format the context from relevant vehicles
                 context = "\n\n".join(
                     [
-                        f"Vehicle: {v['name']}\n"
-                        f"Price: ${v['price']:,}\n"
-                        f"Year: {v['year']}\n"
-                        # f"Mileage: {v['mileage_km']:,} km\n"
-                        f"Fuel Type: {v['fuel_type']}\n"
-                        f"Transmission: {v['transmission']}\n"
-                        # f"Description: {v['description']}"
+                        f"Vehiculo: {v['name']}\n"
+                        f"Precio: ${v['price']:,}\n"
+                        f"Año: {v['year']}\n"
+                        f"TipoCombustible: {v['fuel_type']}\n"
+                        f"TipoTransmision: {v['transmission']}\n"
                         for v in relevant_vehicles
                     ]
                 )
 
-                # Get RAG chain and generate response
+                # Get RAG chain and generate response in Spanish
                 rag_chain = langchain_manager.get_rag_chain()
                 response = rag_chain.predict(
-                    context=context, question=chat_request.message
+                    context=context,
+                    question=f"{chat_request.message} (responde en español)",
                 )
                 logger.info("Generated RAG response")
+
             else:
-                response = "I couldn't find any vehicles matching your query. Could you provide more details?"
+                response = DATA_NOT_FOUND
                 logger.info("No relevant vehicles found for the query")
 
         else:
-            # For non-vehicle queries, use llama3 to generate a response
+            # For non-vehicle queries, use llama3 to generate a response in Spanish
             logger.info("Non-vehicle query detected, generating response with llama3")
-            prompt = (
-                "You are a helpful assistant that specializes in vehicle information. "
-                'The user asked: "{user_query}"\n'
-                "Politely explain that you can only help with vehicle-related questions and provide "
-                "some examples of vehicle questions they could ask instead. Keep it friendly and helpful."
-            ).format(user_query=chat_request.message)
+            prompt = (SUGGEST_RESPONSE_PROMPT + " Responde siempre en español.").format(
+                user_query=chat_request.message
+            )
 
             # Get the LLM instance and generate a response
             llm = langchain_manager.get_llm()
             response = llm.invoke(prompt)
-
-            # Ensure we have a response, fallback to default if needed
-            if (
-                not response or len(response.strip()) < 50
-            ):  # Simple check for empty or very short responses
-                response = (
-                    "I'm sorry, but I'm currently only able to assist with vehicle-related queries. "
-                    "Please ask me about vehicles, such as their models, prices, features, or availability.\n\n"
-                    "For example, you can ask:\n"
-                    "- Show me electric vehicles under $50,000\n"
-                    "- What Toyotas do you have available?\n"
-                    "- Find me a red car with low mileage"
-                )
 
         # Save assistant's response to history
         assistant_message = Message(role="assistant", content=response)

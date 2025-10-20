@@ -10,16 +10,7 @@ from app.config import (
     LLM_TOP_P,
     LLM_CONTEXT_WINDOW,
 )
-
-# RAG prompt template
-RAG_PROMPT_TEMPLATE = """You are a helpful vehicle assistant. Use the following context to answer the question at the end.
-If you don't know the answer, just say that you don't know, don't try to make up an answer.
-
-Context:
-{context}
-
-Question: {question}
-Helpful Answer:"""
+from app.constants.propmts import RAG_PROMPT_TEMPLATE
 
 
 class LangChainManager:

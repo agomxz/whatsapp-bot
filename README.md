@@ -45,10 +45,24 @@ http://127.0.0.1:8000/docs
 - To see more details about how to run the project see the run.md file.
 
 
+## Example Responses
+Fake data
+![alt text](docs/data.png)
+
+Compare items using ids
+![alt text](/docs/compare.png)
+
+Compare items using prompt
+![alt text](/docs/chat.png)
+
 ### 📂 Project Structure
 
-Also use precommit to format code with black and flake8
+Use of precommit to format code with black and flake8
 ![alt text](docs/precommit.png)
+
+Use of pytest to run unit tests
+![alt text](docs/tests.png)
+
 
 #### Example .env file
 ```

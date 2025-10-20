@@ -1,6 +1,4 @@
 import redis
-from typing import Optional
-import logging
 from app.config import REDIS_HOST, REDIS_PORT, logger
 
 
@@ -38,7 +36,7 @@ class RedisManager:
                 socket_timeout=5,
                 decode_responses=True,
                 retry_on_timeout=True,
-                max_connections=20,  # Adjust based on your needs
+                max_connections=20,
             )
             # Test the connection
             self._client.ping()
@@ -75,8 +73,4 @@ redis_manager = RedisManager()
 
 
 def get_redis() -> redis.Redis:
-    """
-    Get a Redis client instance.
-    This is the preferred way to get a Redis connection throughout the application.
-    """
     return redis_manager.client

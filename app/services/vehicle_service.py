@@ -40,7 +40,6 @@ class VehicleService:
         # Convert vehicles to Document objects
         documents = []
         for vehicle in self.vehicles:
-            # Create a text representation of the vehicle for embedding
             text = (
                 f"Vehicle: {vehicle['name']}\n"
                 f"Brand: {vehicle['brand']}\n"
@@ -48,9 +47,7 @@ class VehicleService:
                 f"Year: {vehicle['year']}\n"
                 f"Price: ${vehicle['price']}\n"
                 f"Fuel Type: {vehicle['fuel_type']}\n"
-                # f"Mileage: {vehicle['mileage_km']} km\n"
                 f"Transmission: {vehicle['transmission']}\n"
-                # f"Description: {vehicle['description']}"
             )
 
             # Store metadata for filtering
@@ -102,7 +99,7 @@ class VehicleService:
                 "price": doc.metadata["price"],
                 "fuel_type": doc.metadata["fuel_type"],
                 "transmission": doc.metadata["transmission"],
-                "score": float(1 - score),  # Convert to similarity score (1 - distance)
+                "score": float(1 - score),
                 "content": doc.page_content,
             }
             results.append(vehicle)

@@ -1,4 +1,26 @@
 VEHICLE_KEYWORDS = [
+    "auto",
+    "autos",
+    "automobile",
+    "carro",
+    "carros",
+    "vehiculo",
+    "vehiculos",
+    "año",
+    "precio",
+    "color",
+    "km",
+    "marca",
+    "modelo",
+    "gasolina"
+    "electrico"
+    "hibrido"
+    "kilometraje"
+    "combustible"
+    "transmision"
+    "transmission"
+    "automoviles",
+    "automobiles",
     "car",
     "vehicle",
     "truck",
@@ -14,17 +36,4 @@ VEHICLE_KEYWORDS = [
     "fuel",
     "transmission",
     "toyota",
-    "honda",
-    "ford",
-    "chevrolet",
-    "bmw",
-    "mercedes",
-    "audi",
-    "tesla",
-    "nissan",
-    "hyundai",
-    "kia",
-    "subaru",
-    "volkswagen",
-    "porsche",
 ]
